@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "508179340668",
+    "project_id": "wwe-sus",
+    "storage_bucket": "wwe-sus.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508179340668:android:600850bc8b41dbcc9c18f9",
+        "android_client_info": {
+          "package_name": "com.example.wwe_bets"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU7qXjsQ4HFAhznFxeMIuE8AOJKiCnhP0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
