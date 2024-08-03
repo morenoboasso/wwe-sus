@@ -81,7 +81,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> with TickerProviderSt
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/bg.png'),
+                image: AssetImage('assets/bg.jpeg'),
                 fit: BoxFit.cover,
               ),
             ),
