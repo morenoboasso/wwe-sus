@@ -4,7 +4,6 @@ import '../../services/db_service.dart';
 import '../../style/color_style.dart';
 import '../../style/text_style.dart';
 import '../../widgets/bet_card/bet_card_shape.dart';
-import '../../widgets/intro_screen.dart';
 
 class ActiveBetsPage extends StatefulWidget {
   const ActiveBetsPage({super.key});
@@ -91,17 +90,6 @@ class _ActiveBetsPageState extends State<ActiveBetsPage> {
                     "Scommesse Attive",
                     style: TextStyleBets.activeBetTitle,
                   ),
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.info_outline_rounded),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const IntroScreen()),
-                        );
-                      },
-                    ),
-                  ],
                 ),
                 Expanded(
                   child: Container(

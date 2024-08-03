@@ -43,7 +43,6 @@ dependencies:
   pwa_install: ^0.0.5
   vibration: ^1.9.0
   auto_size_text: ^3.0.0
-  introduction_screen: ^3.1.14
 
 dev_dependencies:
   flutter_test:
