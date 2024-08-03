@@ -16,7 +16,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await GetStorage.init(); // Inizializza GetStorage
+  await GetStorage.init();
 
 
     runApp(const MyApp(initialRoute: AppRoutes.mainScreen));
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'CodeBets',
+      title: 'WWE PPVs',
       initialRoute: initialRoute,
       getPages: AppRoutes.routes,
     );
@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage>
         Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("assets/bg.png"),
+              image: AssetImage("assets/bg.jpeg"),
               fit: BoxFit.cover,
             ),
           ),

@@ -54,7 +54,7 @@ class _CreateBetPageState extends State<CreateBetPage> {
             child: Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage("assets/bg.png"),
+                  image: AssetImage("assets/bg.jpeg"),
                   fit: BoxFit.cover,
                 ),
               ),
