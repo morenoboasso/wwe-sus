@@ -1,131 +1,222 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:vibration/vibration.dart';
+import 'package:wwe_bets/routes.dart';
+import 'package:wwe_bets/services/db_service.dart';
+import 'package:wwe_bets/style/color_style.dart';
+import 'package:wwe_bets/style/text_style.dart';
+import 'package:wwe_bets/widgets/login/login_input.dart';
 import 'firebase_options.dart';
 
-Future<void> main() async {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  await GetStorage.init(); // Inizializza GetStorage
+
+
+  // Check if a username is stored in GetStorage
+  String? storedUserName = GetStorage().read<String>('userName');
+  if (storedUserName != null) {
+    // If it exists, navigate directly to the main screen
+    runApp(const MyApp(initialRoute: AppRoutes.mainScreen));
+  } else {
+    // Otherwise, show the intro screen
+    runApp(const MyApp(initialRoute: AppRoutes.intro));
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
 
-  // This widget is the root of your application.
+  const MyApp({required this.initialRoute, super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return GetMaterialApp(
+      title: 'CodeBets',
+      initialRoute: initialRoute,
+      getPages: AppRoutes.routes,
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+//login
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+    _controller.forward();
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  bool get isLandscape =>
+      MediaQuery.of(context).orientation == Orientation.landscape;
+
+  @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    String userName = '';
+    DbService dbService = DbService();
+
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: isLandscape
+          ? SingleChildScrollView(
+        child: _buildContent(userName, dbService),
+      )
+          : _buildContent(userName, dbService),
+    );
+  }
+
+  Widget _buildContent(String userName, DbService dbService) {
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/bg.png"),
+              fit: BoxFit.cover,
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                AnimatedBuilder(
+                  animation: _animation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _animation.value,
+                      child: RotationTransition(
+                        turns: _animation,
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              "assets/logo.png",
+                              width: isLandscape
+                                  ? MediaQuery.of(context).size.width * 0.4
+                                  : MediaQuery.of(context).size.width * 0.6,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20,),
+                Text("Login", style: TextStyleBets.titleBlue,
+                ),
+                const SizedBox(height: 40,),
+                SizedBox(
+                  height: 60,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: LoginTextField(
+                            onChanged: (value) {
+                              userName = value.trim();
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (userName.isNotEmpty) {
+                              userName = userName[0].toUpperCase() +
+                                  userName.substring(1);
+                            }
+                            bool nameExists = await dbService
+                                .checkUserNameExists(userName);
+                            if (nameExists) {
+                              Get.offNamed(AppRoutes.mainScreen);
+                              GetStorage().write('userName', userName);
+                              FocusScope.of(context).unfocus();
+                            } else {
+                              Vibration.vibrate(
+                                  duration: 200, amplitude: 128);
+                              Get.snackbar(
+                                'Accesso Fallito',
+                                'Sei così stupido che non sai il tuo nome?',
+                                icon: const Icon(
+                                  Icons.error_sharp,
+                                  color: Colors.white,
+                                ),
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: const CircleBorder(),
+                            backgroundColor: ColorsBets.blueHD,
+                            padding: const EdgeInsets.all(10),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward,
+                            size: 30,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40,),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        const Positioned(
+          left: 0, right: 0, bottom: 10,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                "Questo gioco crea dipendenza, pertanto è vietato ai minori di 18.",
+                style: TextStyle(
+                  color: Colors.black45,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
