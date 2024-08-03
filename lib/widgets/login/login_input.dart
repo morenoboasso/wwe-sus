@@ -11,8 +11,8 @@ class LoginTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextSelectionTheme(
       data: TextSelectionThemeData(
-        selectionColor: ColorsBets.blueHD.withOpacity(0.5),
-        cursorColor: ColorsBets.blueHD.withOpacity(0.9),
+        selectionColor: ColorsBets.blackHD.withOpacity(0.5),
+        cursorColor: ColorsBets.blackHD.withOpacity(0.9),
       ),
       child: TextField(
         // cursor
@@ -35,21 +35,21 @@ class LoginTextField extends StatelessWidget {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20.0),
             borderSide: const BorderSide(
-              color: ColorsBets.blueHD,
+              color: ColorsBets.blackHD,
               width: 2.5,
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20.0),
             borderSide: const BorderSide(
-              color: ColorsBets.blueHD,
+              color: ColorsBets.blackHD,
               width: 2.5,
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20.0),
             borderSide: const BorderSide(
-              color: ColorsBets.blueHD,
+              color: ColorsBets.blackHD,
               width: 2.5,
             ),
           ),

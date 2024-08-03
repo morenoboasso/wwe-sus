@@ -21,7 +21,7 @@ class BetCreator extends StatelessWidget {
         children: [
           const Text(
             'Creata: ',
-            style: TextStyle(fontSize: 14, color: ColorsBets.blueHD, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 14, color: ColorsBets.whiteHD, fontWeight: FontWeight.bold),
           ),
           CircleAvatar(
             backgroundImage: creatorAvatar != null
@@ -33,7 +33,7 @@ class BetCreator extends StatelessWidget {
           const SizedBox(width: 3),
           Text(
             creatorName,
-            style: const TextStyle(fontSize: 15, color: ColorsBets.blueHD, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 15, color: ColorsBets.whiteHD, fontWeight: FontWeight.bold),
           ),
         ],
       ),

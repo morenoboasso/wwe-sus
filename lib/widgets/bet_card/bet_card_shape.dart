@@ -108,7 +108,7 @@ class _BetCardState extends State<BetCard> {
       surfaceTintColor: ColorsBets.whiteHD,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: const BorderSide(color: ColorsBets.blueHD, width: 2),
+        side: const BorderSide(color: ColorsBets.whiteHD, width: 2),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),

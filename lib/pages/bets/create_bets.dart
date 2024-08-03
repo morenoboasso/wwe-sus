@@ -80,7 +80,7 @@ class _CreateBetPageState extends State<CreateBetPage> {
                           children: [
                             Text('Crea', style: TextStyleBets.betTextTitle),
                             const SizedBox(width: 5),
-                            const Icon(Icons.arrow_forward, color: ColorsBets.blueHD),
+                            const Icon(Icons.arrow_forward, color: ColorsBets.whiteHD),
                           ],
                         ),
                       ),
@@ -159,7 +159,7 @@ class _CreateBetPageState extends State<CreateBetPage> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.remove_circle, color: ColorsBets.blueHD),
+                                  icon: const Icon(Icons.remove_circle, color: ColorsBets.whiteHD),
                                   onPressed: () {
                                     setState(() {
                                       _showThirdAnswer = false;
@@ -185,7 +185,7 @@ class _CreateBetPageState extends State<CreateBetPage> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.remove_circle, color: ColorsBets.blueHD),
+                                  icon: const Icon(Icons.remove_circle, color: ColorsBets.whiteHD),
                                   onPressed: () {
                                     setState(() {
                                       _showFourthAnswer = false;
@@ -212,12 +212,12 @@ class _CreateBetPageState extends State<CreateBetPage> {
                                   },
                                   style: OutlinedButton.styleFrom(
                                     backgroundColor: Colors.white,
-                                    side: const BorderSide(color: ColorsBets.blueHD, width: 2),
+                                    side: const BorderSide(color: ColorsBets.whiteHD, width: 2),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
-                                  child: const Text('Aggiungi altre risposte', style: TextStyle(color: ColorsBets.blueHD)),
+                                  child: const Text('Aggiungi altre risposte', style: TextStyle(color: ColorsBets.whiteHD)),
                                 ),
                               ],
                             ),

@@ -125,7 +125,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> with TickerProviderSt
   Widget _buildLeaderboard() {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(color: ColorsBets.blueHD,),
+        child: CircularProgressIndicator(color: ColorsBets.whiteHD,),
       );
     }
     List<MapEntry<String, int>> sortedUsers = _getSortedUsers();

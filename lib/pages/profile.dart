@@ -128,7 +128,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               Text(
                                 '${_userData['score'] ?? ''}',
-                                style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.blueHD),
+                                style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.whiteHD),
                               ),
                             ],
                           ),
@@ -142,7 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               Text(
                                 '${_userData['scommesse_create'] ?? ''}',
-                                style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.blueHD),
+                                style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.whiteHD),
                               ),
                             ],
                           ),
@@ -159,7 +159,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   Text(
                                     '${_userData['scommesse_vinte'] ?? ''}',
-                                    style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.blueHD),
+                                    style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.whiteHD),
                                   ),
                                 ],
                               ),
@@ -173,7 +173,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   Text(
                                     '${_userData['scommesse_perse'] ?? ''}',
-                                    style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.blueHD),
+                                    style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.whiteHD),
                                   ),
                                 ],
                               ),
@@ -225,7 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
             right: 5,
             child: IconButton(
               onPressed: _logout,
-              icon: const Icon(Icons.logout,color: ColorsBets.blueHD,size: 28,),
+              icon: const Icon(Icons.logout,color: ColorsBets.whiteHD,size: 28,),
             ),
           ),
         ],

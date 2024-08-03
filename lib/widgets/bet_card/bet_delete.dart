@@ -50,14 +50,14 @@ class DeleteConfirmationModal extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: ColorsBets.blueHD, width: 2.5),
+                border: Border.all(color: ColorsBets.whiteHD, width: 2.5),
               ),
               child: TextButton(
                 onPressed: onCancel,
                 child: Text(
                   'Annulla',
                   style: TextStyle(
-                    color: ColorsBets.blueHD.withOpacity(0.8),
+                    color: ColorsBets.whiteHD.withOpacity(0.8),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -88,7 +88,7 @@ class DeleteConfirmationModal extends StatelessWidget {
 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: const BorderSide(color: ColorsBets.blueHD, width: 3),
+        side: const BorderSide(color: ColorsBets.whiteHD, width: 3),
       ),
     );
   }

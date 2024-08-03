@@ -32,8 +32,8 @@ class BetAnswerFormField extends StatelessWidget {
           ),
           child: TextSelectionTheme(
             data: TextSelectionThemeData(
-              selectionColor: ColorsBets.blueHD.withOpacity(0.3),
-              cursorColor: ColorsBets.blueHD.withOpacity(0.9),
+              selectionColor: ColorsBets.whiteHD.withOpacity(0.3),
+              cursorColor: ColorsBets.whiteHD.withOpacity(0.9),
             ),
             child: TextFormField(
               cursorOpacityAnimates: true,
@@ -49,14 +49,14 @@ class BetAnswerFormField extends StatelessWidget {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: BorderSide(
-                    color: ColorsBets.blueHD.withOpacity(0.8),
+                    color: ColorsBets.whiteHD.withOpacity(0.8),
                     width: 1.0,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: BorderSide(
-                    color: ColorsBets.blueHD.withOpacity(0.8),
+                    color: ColorsBets.whiteHD.withOpacity(0.8),
                     width: 2.0,
                   ),
                 ),
