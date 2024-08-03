@@ -6,13 +6,11 @@ import '../../models/bet.dart';
 import '../../services/db_service.dart';
 import '../../style/color_style.dart';
 import '../../style/text_style.dart';
-import 'bet_creator.dart';
 import 'bet_delete.dart';
 import 'bet_terminate_button.dart';
 import 'bets_answer/bet_answers.dart';
 import 'answer_confirm_button.dart';
 import 'bet_description.dart';
-import 'bet_target.dart';
 import 'bet_title.dart';
 
 class BetCard extends StatefulWidget {
@@ -108,7 +106,7 @@ class _BetCardState extends State<BetCard> {
       surfaceTintColor: ColorsBets.whiteHD,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: const BorderSide(color: ColorsBets.whiteHD, width: 2),
+        side: const BorderSide(color: ColorsBets.blackHD, width: 2),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
@@ -124,21 +122,10 @@ class _BetCardState extends State<BetCard> {
                   if (widget.bet.description.isNotEmpty)
                     BetDescription(description: widget.bet.description),
                   const SizedBox(height: 5),
-                  if (widget.bet.target.isNotEmpty)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BetTarget(targetName: targetName, targetAvatar: targetAvatar!),
-                      ],
-                    ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      BetCreator(
-                        creatorName: widget.bet.creator,
-                        creatorAvatar: creatorAvatar,
-                      ),
                       Text(
                         'Voti: $votingCountText',
                         style: TextStyleBets.inputTextLogin,
