@@ -18,9 +18,12 @@ void main() async {
   );
   await GetStorage.init();
 
+  final box = GetStorage();
+  final userName = box.read('userName');
 
-    runApp(const MyApp(initialRoute: AppRoutes.mainScreen));
+  runApp(MyApp(initialRoute: userName != null ? AppRoutes.mainScreen : AppRoutes.login));
 }
+
 
 class MyApp extends StatelessWidget {
   final String initialRoute;
@@ -30,7 +33,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'WWE PPVs',
+      title: 'WWE PPV',
       initialRoute: initialRoute,
       getPages: AppRoutes.routes,
     );
@@ -123,7 +126,7 @@ class _LoginPageState extends State<LoginPage>
                   },
                 ),
                 const SizedBox(height: 20,),
-                Text("Login", style: TextStyleBets.titleBlue,
+                Text("Accedi", style: TextStyleBets.titleBlue,
                 ),
                 const SizedBox(height: 40,),
                 SizedBox(
@@ -170,13 +173,14 @@ class _LoginPageState extends State<LoginPage>
                           },
                           style: ElevatedButton.styleFrom(
                             shape: const CircleBorder(),
-                            backgroundColor: ColorsBets.blueHD,
+                            backgroundColor: ColorsBets.whiteHD,
                             padding: const EdgeInsets.all(10),
+                            side: const BorderSide(color: ColorsBets.blackHD, width: 1), // Added black border
                           ),
                           child: const Icon(
                             Icons.arrow_forward,
-                            size: 30,
-                            color: Colors.white,
+                            size: 35,
+                            color: ColorsBets.blackHD,
                           ),
                         ),
                       ],
@@ -185,25 +189,6 @@ class _LoginPageState extends State<LoginPage>
                 ),
                 const SizedBox(height: 40,),
               ],
-            ),
-          ),
-        ),
-        const Positioned(
-          left: 0, right: 0, bottom: 10,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Text(
-                "Questo gioco crea dipendenza, pertanto è vietato ai minori di 18.",
-                style: TextStyle(
-                  color: Colors.black45,
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 10,
-                ),
-                textAlign: TextAlign.center,
-              ),
             ),
           ),
         ),

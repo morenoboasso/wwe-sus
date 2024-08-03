@@ -42,7 +42,7 @@ class BetTargetDropdownFormField extends StatelessWidget {
                       surfaceTintColor: ColorsBets.whiteHD,
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                        side: BorderSide(color: ColorsBets.blueHD, width:3.0),
+                        side: BorderSide(color: ColorsBets.whiteHD, width:3.0),
                       ),
                       title:  Text("Cos'è il 'Target' ?", textAlign: TextAlign.center,style: TextStyleBets.dialogTitle,),
                       content: const AutoSizeText(
@@ -111,14 +111,14 @@ class BetTargetDropdownFormField extends StatelessWidget {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: BorderSide(
-                  color: ColorsBets.blueHD.withOpacity(0.8),
+                  color: ColorsBets.whiteHD.withOpacity(0.8),
                   width: 1.0,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: BorderSide(
-                  color: ColorsBets.blueHD.withOpacity(0.8),
+                  color: ColorsBets.whiteHD.withOpacity(0.8),
                   width: 2.0,
                 ),
               ),

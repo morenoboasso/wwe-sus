@@ -25,13 +25,13 @@ class _DialogTerminateBetState extends State<DialogTerminateBet> {
       surfaceTintColor: ColorsBets.whiteHD,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: const BorderSide(color: ColorsBets.blueHD, width: 3.5),
+        side: const BorderSide(color: ColorsBets.whiteHD, width: 3.5),
       ),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: ColorsBets.blueHD, width: 2),
+          border: Border.all(color: ColorsBets.whiteHD, width: 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -99,9 +99,9 @@ class _DialogTerminateBetState extends State<DialogTerminateBet> {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
           color: selectedAnswer == answer
-              ? ColorsBets.blueHD.withOpacity(1)
-              : ColorsBets.blueHD.withOpacity(0.1),
-          border: Border.all(color: ColorsBets.blueHD, width: 2),
+              ? ColorsBets.whiteHD.withOpacity(1)
+              : ColorsBets.whiteHD.withOpacity(0.1),
+          border: Border.all(color: ColorsBets.whiteHD, width: 2),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Center(

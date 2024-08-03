@@ -47,10 +47,10 @@ class UserCard extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5.0),
-          side:  BorderSide(color:isCurrentUser ? ColorsBets.blueHD : ColorsBets.blueHD, width: 2),
+          side:  BorderSide(color:isCurrentUser ? ColorsBets.whiteHD : ColorsBets.whiteHD, width: 2),
         ),
-        surfaceTintColor: isCurrentUser ? ColorsBets.blueHD : ColorsBets.whiteHD,
-        color: isCurrentUser ? ColorsBets.blueHD : ColorsBets.whiteHD,
+        surfaceTintColor: isCurrentUser ? ColorsBets.whiteHD : ColorsBets.whiteHD,
+        color: isCurrentUser ? ColorsBets.whiteHD : ColorsBets.whiteHD,
         margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 25.0),
         child: Padding(
           padding: const EdgeInsets.all(10.0),

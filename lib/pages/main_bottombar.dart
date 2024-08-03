@@ -40,7 +40,7 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
           decoration: BoxDecoration(
             color: ColorsBets.whiteHD,
             borderRadius: BorderRadius.circular(7.0),
-            border: Border.all(color: ColorsBets.blueHD, width: 1.8),
+            border: Border.all(color: ColorsBets.whiteHD, width: 1.8),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(7.0),
@@ -56,7 +56,7 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
                 _buildNavigationBarItem(Icons.person, 'Profilo', 4),
               ],
               currentIndex: _selectedIndex,
-              selectedItemColor: ColorsBets.blueHD,
+              selectedItemColor: ColorsBets.whiteHD,
               unselectedItemColor: ColorsBets.blackHD.withOpacity(0.4),
               showSelectedLabels: true,
               showUnselectedLabels: false,

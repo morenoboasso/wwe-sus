@@ -7,7 +7,7 @@ class TextStyleBets {
   static TextStyle get titleBlue => const TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.bold,
-    color: ColorsBets.blueHD,
+    color: ColorsBets.whiteHD,
   );
 
   //  --login--
@@ -15,13 +15,13 @@ class TextStyleBets {
   static TextStyle get hintTextLogin => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.bold,
-    color: ColorsBets.blueHD.withOpacity(0.8),
+    color: ColorsBets.blackHD.withOpacity(0.8),
   );
   //login input text
   static TextStyle get inputTextLogin => const TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.bold,
-    color: ColorsBets.blueHD,
+    color: ColorsBets.blackHD,
   );
   //create bet
   //bet input form
@@ -46,7 +46,7 @@ class TextStyleBets {
   static TextStyle get betTextTitle => const TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.bold,
-    color: ColorsBets.blueHD,
+    color: ColorsBets.whiteHD,
   );
 
   //bets attive
@@ -61,7 +61,7 @@ class TextStyleBets {
   static TextStyle get dialogTitle => const TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
-    color: ColorsBets.blueHD,
+    color: ColorsBets.whiteHD,
   );
 
   //bet answers
@@ -75,13 +75,13 @@ class TextStyleBets {
   static TextStyle get betScegliAnswer => const TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
-    color: ColorsBets.blueHD,
+    color: ColorsBets.whiteHD,
   );
 
 //bet title
   static TextStyle get betsTitle => const TextStyle(
     fontSize: 20,
-    color: ColorsBets.blueHD,
+    color: ColorsBets.whiteHD,
     fontWeight: FontWeight.bold,
   );
   //bet description
@@ -127,7 +127,7 @@ class TextStyleBets {
 
   static TextStyle get userPositionLeader => const TextStyle(
       fontWeight: FontWeight.w900,
-      color: ColorsBets.blueHD,
+      color: ColorsBets.whiteHD,
       fontSize: 20
   );
   static TextStyle get userSelfPositionLeader => const TextStyle(
@@ -139,7 +139,7 @@ class TextStyleBets {
   //onboarding
   static TextStyle get onboardTitle => const TextStyle(
       fontWeight: FontWeight.w900,
-      color: ColorsBets.blueHD,
+      color: ColorsBets.whiteHD,
       fontSize: 24
   );
 

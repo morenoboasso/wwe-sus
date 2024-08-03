@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ColorsBets {
-  static const Color blueHD = Color(0xFF83B4BF);
   static const Color orangeHD = Color(0xFFE87427);
   static const Color yellowHD = Color(0xFFFECB45);
   static const Color blackHD = Color(0xFF080202);

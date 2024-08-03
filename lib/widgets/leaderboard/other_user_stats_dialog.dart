@@ -28,7 +28,7 @@ class UserModal extends StatelessWidget {
       backgroundColor: ColorsBets.whiteHD,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: const BorderSide(color: ColorsBets.blueHD, width: 3.5),
+        side: const BorderSide(color: ColorsBets.whiteHD, width: 3.5),
       ),
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -79,7 +79,7 @@ class UserModal extends StatelessWidget {
               Text(
                 '$score',
                 style: TextStyleBets.profileVariable
-                  .copyWith(color: ColorsBets.blueHD),
+                  .copyWith(color: ColorsBets.whiteHD),
               ),
             ]),
           ),
@@ -89,7 +89,7 @@ class UserModal extends StatelessWidget {
               Text(
                 'Scommesse create: ', style: TextStyleBets.profileVariable,
               ),
-              Text('$scommesseCreate', style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.blueHD)),
+              Text('$scommesseCreate', style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.whiteHD)),
             ]),
           ),
           const SizedBox(height: 10),
@@ -101,7 +101,7 @@ class UserModal extends StatelessWidget {
                   Text(
                     'Vinte: ', style: TextStyleBets.profileVariable,
                   ),
-                  Text('$scommesseVinte', style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.blueHD)),
+                  Text('$scommesseVinte', style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.whiteHD)),
                 ]),
               ),
               const SizedBox(width: 20),
@@ -110,7 +110,7 @@ class UserModal extends StatelessWidget {
                   Text(
                     'Perse: ', style: TextStyleBets.profileVariable,
                   ),
-                  Text('$scommessePerse', style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.blueHD)),
+                  Text('$scommessePerse', style: TextStyleBets.profileVariable.copyWith(color: ColorsBets.whiteHD)),
                 ]),
               ),
             ],
