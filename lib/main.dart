@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,15 +19,7 @@ void main() async {
   await GetStorage.init(); // Inizializza GetStorage
 
 
-  // Check if a username is stored in GetStorage
-  String? storedUserName = GetStorage().read<String>('userName');
-  if (storedUserName != null) {
-    // If it exists, navigate directly to the main screen
     runApp(const MyApp(initialRoute: AppRoutes.mainScreen));
-  } else {
-    // Otherwise, show the intro screen
-    runApp(const MyApp(initialRoute: AppRoutes.intro));
-  }
 }
 
 class MyApp extends StatelessWidget {
