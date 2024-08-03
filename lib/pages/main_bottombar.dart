@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wwe_bets/pages/profile.dart';
 import '../style/color_style.dart';
-import 'bets/active_bets.dart';
-import 'bets/create_bets.dart';
-import 'leaderboard.dart';
+
 
 class BottomNavigationBarWidget extends StatefulWidget {
   const BottomNavigationBarWidget({super.key});
@@ -17,10 +14,7 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
   int _selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
-    const ActiveBetsPage(),
-    const CreateBetPage(),
-    const LeaderboardPage(),
-    const ProfilePage(),
+
   ];
 
   void _onItemTapped(int index) {
