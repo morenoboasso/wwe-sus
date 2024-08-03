@@ -49,8 +49,8 @@ class _ActiveBetsPageState extends State<ActiveBetsPage> {
           const SizedBox(height: 10),
           ClipOval(
             child: Container(
-              width: 50,
-              height: 50,
+              width: 70,
+              height: 70,
               color: ColorsBets.whiteHD,
               child: Image.asset(
                 "assets/error.gif",
