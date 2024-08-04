@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
+import '../pages/create_match/create_match_card_page.dart';
 import '../style/color_style.dart';
-
-
 class BottomNavigationBarWidget extends StatefulWidget {
   const BottomNavigationBarWidget({super.key});
-
   @override
-  BottomNavigationBarWidgetState createState() =>
-      BottomNavigationBarWidgetState();
+  BottomNavigationBarWidgetState createState() => BottomNavigationBarWidgetState();
 }
 
 class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
   int _selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
-
+    const CreateMatchCardPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -29,7 +26,7 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
       extendBody: true,
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 10.0,left: 45,right: 45,top: 5),
+        padding: const EdgeInsets.only(bottom: 10.0, left: 45, right: 45, top: 5),
         child: Container(
           decoration: BoxDecoration(
             color: ColorsBets.whiteHD,
@@ -44,13 +41,13 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
               selectedIconTheme: const IconThemeData(size: 28),
               unselectedIconTheme: const IconThemeData(size: 24),
               items: <BottomNavigationBarItem>[
-                _buildNavigationBarItem(Icons.question_answer, 'Attive', 0),
+                _buildNavigationBarItem(Icons.add_box, 'Crea', 0),
                 _buildNavigationBarItem(Icons.add_box, 'Crea', 1),
-                _buildNavigationBarItem(Icons.emoji_events, 'Classifica', 2),
-                _buildNavigationBarItem(Icons.person, 'Profilo', 4),
+                _buildNavigationBarItem(Icons.add_box, 'Crea', 2),
+
               ],
               currentIndex: _selectedIndex,
-              selectedItemColor: ColorsBets.whiteHD,
+              selectedItemColor: ColorsBets.blackHD,
               unselectedItemColor: ColorsBets.blackHD.withOpacity(0.4),
               showSelectedLabels: true,
               showUnselectedLabels: false,
