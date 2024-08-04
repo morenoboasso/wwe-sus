@@ -1,6 +1,6 @@
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:wwe_bets/pages/login_page.dart';
-import 'package:wwe_bets/pages/main_bottombar.dart';
+import 'package:wwe_bets/widgets/main_bottombar.dart';
 
 class AppRoutes {
   static const String login = '/login';
