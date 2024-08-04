@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:vibration/vibration.dart';
-import 'package:wwe_bets/routes.dart';
+import 'package:wwe_bets/routes/routes.dart';
 import 'package:wwe_bets/style/color_style.dart';
 import 'package:wwe_bets/style/text_style.dart';
 import 'package:wwe_bets/widgets/login/login_input.dart';
@@ -110,27 +110,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         const SizedBox(width: 5),
                         ElevatedButton(
                           onPressed: () async {
-                            if (userName.isNotEmpty) {
-                              userName = userName[0].toUpperCase() + userName.substring(1);
-                            }
-                            bool nameExists = await dbService.checkUserNameExists(userName);
-                            if (nameExists) {
-                              Get.offNamed(AppRoutes.mainScreen);
-                              GetStorage().write('userName', userName);
-                              FocusScope.of(context).unfocus();
-                            } else {
-                              Vibration.vibrate(duration: 200, amplitude: 128);
-                              Get.snackbar(
-                                'Accesso Fallito',
-                                'Sei così stupido che non sai il tuo nome?',
-                                icon: const Icon(
-                                  Icons.error_sharp,
-                                  color: Colors.white,
-                                ),
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                              );
-                            }
+                            await _handleLogin(userName, dbService);
                           },
                           style: ElevatedButton.styleFrom(
                             shape: const CircleBorder(),
@@ -155,5 +135,31 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         ),
       ],
     );
+  }
+
+  Future<void> _handleLogin(String userName, DbService dbService) async {
+    if (userName.isNotEmpty) {
+      userName = userName[0].toUpperCase() + userName.substring(1);
+    }
+    bool nameExists = await dbService.checkUserNameExists(userName);
+    if (mounted) {
+      if (nameExists) {
+        Get.offNamed(AppRoutes.mainScreen);
+        GetStorage().write('userName', userName);
+        FocusScope.of(context).unfocus();
+      } else {
+        Vibration.vibrate(duration: 200, amplitude: 128);
+        Get.snackbar(
+          'Accesso Fallito',
+          'Sei così stupido che non sai il tuo nome?',
+          icon: const Icon(
+            Icons.error_sharp,
+            color: Colors.white,
+          ),
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    }
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:wwe_bets/routes.dart';
+import 'package:wwe_bets/routes/routes.dart';
 import 'firebase_options.dart';
 
 void main() async {
