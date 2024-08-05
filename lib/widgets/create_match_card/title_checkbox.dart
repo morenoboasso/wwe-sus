@@ -8,8 +8,8 @@ class TitleCheckbox extends StatelessWidget {
   const TitleCheckbox({
     required this.isChecked,
     required this.onChanged,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

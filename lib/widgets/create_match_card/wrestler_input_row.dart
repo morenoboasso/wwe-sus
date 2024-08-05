@@ -18,8 +18,8 @@ class WrestlerInputRow extends StatelessWidget {
     required this.onRemoveWrestler,
     required this.addWrestlerCallback,
     required this.canAddWrestler,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class WrestlerInputRow extends StatelessWidget {
                   return null;
                 }
                     : null,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.black, width: 1),
                   ),
@@ -49,7 +49,7 @@ class WrestlerInputRow extends StatelessWidget {
               ),
             ),
             if (index2 < wrestlers.length) ...[
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: TextFormField(
                   initialValue: wrestlers[index2],
@@ -72,7 +72,7 @@ class WrestlerInputRow extends StatelessWidget {
             ],
             if (wrestlers.length > 2) ...[
               IconButton(
-                icon: Icon(Icons.remove_circle),
+                icon: const Icon(Icons.remove_circle),
                 onPressed: () => onRemoveWrestler(index1 < wrestlers.length ? index1 : index2),
               ),
             ],
@@ -83,7 +83,7 @@ class WrestlerInputRow extends StatelessWidget {
             padding: const EdgeInsets.only(top: 16.0),
             child: ElevatedButton(
               onPressed: addWrestlerCallback,
-              child: Text('Aggiungi Wrestler'),
+              child: const Text('Aggiungi Wrestler'),
             ),
           ),
       ],
