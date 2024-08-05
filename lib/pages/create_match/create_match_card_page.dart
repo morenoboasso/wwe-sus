@@ -25,107 +25,135 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        actions: [
-          GestureDetector(
-            onTap: _saveMatchCard,
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/bg.jpeg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: Form(
+                      key: _formKey,
+                      child: ListView(
+                        children: <Widget>[
+                          const Text('PPV *', style: TextStyle(color: Colors.white)),
+                          const SizedBox(height: 8),
+                          PPVInput(
+                            selectedPPV: _selectedPPV,
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedPPV = value;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          TitleCheckbox(
+                            isChecked: _showTitleField,
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _showTitleField = value;
+                                });
+                              }
+                            },
+                          ),
+                          if (_showTitleField)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: TextFormField(
+                                controller: _titleController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Inserisci il titolo..',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 16),
+                          const Text('Tipo di Match *', style: TextStyle(color: Colors.white)),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _typeController,
+                            decoration: const InputDecoration(
+                              hintText: 'Inserisci il tipo di match..',
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Inserisci tipo di match.';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          const Text('Inserisci Partecipanti *', style: TextStyle(color: Colors.white)),
+                          const SizedBox(height: 8),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: (wrestlers.length / 2).ceil(),
+                            itemBuilder: (context, rowIndex) {
+                              int index1 = rowIndex * 2;
+                              int index2 = index1 + 1;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: WrestlerInputRow(
+                                  index1: index1,
+                                  index2: index2,
+                                  wrestlers: wrestlers,
+                                  onWrestlerChanged: _onWrestlerChanged,
+                                  onRemoveWrestler: _removeWrestler,
+                                  addWrestlerCallback: _addWrestler,
+                                  canAddWrestler: wrestlers.length < 20 && rowIndex == (wrestlers.length / 2).ceil() - 1,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 16,
+            right: 16,
             child: Row(
               children: [
-                Text("Crea"),
-                Icon(Icons.check),
+                GestureDetector(
+                  onTap: _saveMatchCard,
+                  child: const Row(
+                    children: [
+                      Text(
+                        "Crea",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         ],
       ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListView(
-              children: <Widget>[
-                const Text('PPV *'),
-                const SizedBox(height: 8),
-                PPVDropdown(
-                  selectedPPV: _selectedPPV,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedPPV = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-                TitleCheckbox(
-                  isChecked: _showTitleField,
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _showTitleField = value;
-                      });
-                    }
-                  },
-                ),
-                if (_showTitleField)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: TextFormField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(
-                        hintText: 'Inserisci il titolo..',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                const Text('Tipo di Match *'),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _typeController,
-                  decoration: const InputDecoration(
-                    hintText: 'Inserisci il tipo di match..',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Inserisci tipo di match.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                const Text('Inserisci Partecipanti *'),
-                const SizedBox(height: 8),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: (wrestlers.length / 2).ceil(),
-                  itemBuilder: (context, rowIndex) {
-                    int index1 = rowIndex * 2;
-                    int index2 = index1 + 1;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: WrestlerInputRow(
-                        index1: index1,
-                        index2: index2,
-                        wrestlers: wrestlers,
-                        onWrestlerChanged: _onWrestlerChanged,
-                        onRemoveWrestler: _removeWrestler,
-                        addWrestlerCallback: _addWrestler,
-                        canAddWrestler: wrestlers.length < 20 && rowIndex == (wrestlers.length / 2).ceil() - 1,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
-
 
   void _addWrestler() {
     setState(() {
