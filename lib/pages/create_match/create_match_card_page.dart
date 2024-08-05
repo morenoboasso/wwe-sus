@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:wwe_bets/services/db_service.dart';
-import '../../routes/routes.dart';
-import '../../types/ppv_options.dart';
-import 'add_wrestler_page.dart';
+import 'package:wwe_bets/widgets/create_match_card/ppv_dropdown.dart';
+import '../../services/db_service.dart';
+import '../../widgets/create_match_card/title_checkbox.dart';
+import '../../widgets/create_match_card/wrestler_input_row.dart';
 
 class CreateMatchCardPage extends StatefulWidget {
   const CreateMatchCardPage({super.key});
@@ -20,114 +19,150 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
 
   String? _selectedPPV;
   bool _showTitleField = false;
+  List<String> wrestlers = ['', ''];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text('Crea Match Card'),
+        actions: [
+          GestureDetector(
+            onTap: _saveMatchCard,
+            child: Row(
+              children: [
+                Text("Crea"),
+                Icon(Icons.check),
+              ],
+            ),
+          ),
+        ],
       ),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text('PPV *'),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                hint: const Text('Scegli un PPV'),
-                value: _selectedPPV,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: <Widget>[
+                const Text('PPV *'),
+                const SizedBox(height: 8),
+                PPVDropdown(
+                  selectedPPV: _selectedPPV,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedPPV = value;
+                    });
+                  },
                 ),
-                items: ppvOptions.map((ppv) {
-                  return DropdownMenuItem(
-                    value: ppv,
-                    child: Text(ppv),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedPPV = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Seleziona il PPV';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: Text('Titolo in palio'),
-                  ),
-                  Switch(
-                    value: _showTitleField,
-                    onChanged: (value) {
+                const SizedBox(height: 16),
+                TitleCheckbox(
+                  isChecked: _showTitleField,
+                  onChanged: (value) {
+                    if (value != null) {
                       setState(() {
                         _showTitleField = value;
                       });
-                    },
-                  ),
-                ],
-              ),
-              if (_showTitleField)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: TextFormField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      hintText: 'Inserisci il titolo..',
-                      border: OutlineInputBorder(),
+                    }
+                  },
+                ),
+                if (_showTitleField)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: TextFormField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(
+                        hintText: 'Inserisci il titolo..',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
+                const SizedBox(height: 16),
+                const Text('Tipo di Match *'),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _typeController,
+                  decoration: const InputDecoration(
+                    hintText: 'Inserisci il tipo di match..',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Inserisci tipo di match.';
+                    }
+                    return null;
+                  },
                 ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 20),
+                const Text('Inserisci Partecipanti *'),
+                const SizedBox(height: 8),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: (wrestlers.length / 2).ceil(),
+                  itemBuilder: (context, rowIndex) {
+                    int index1 = rowIndex * 2;
+                    int index2 = index1 + 1;
 
-              const Text('Tipo di Match *'),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _typeController,
-                decoration: const InputDecoration(
-                  hintText: 'Inserisci il tipo di match..',
-                  border: OutlineInputBorder(),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: WrestlerInputRow(
+                        index1: index1,
+                        index2: index2,
+                        wrestlers: wrestlers,
+                        onWrestlerChanged: _onWrestlerChanged,
+                        onRemoveWrestler: _removeWrestler,
+                        addWrestlerCallback: _addWrestler,
+                        canAddWrestler: wrestlers.length < 20 && rowIndex == (wrestlers.length / 2).ceil() - 1,
+                      ),
+                    );
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Inserisci tipo di match';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final payperview = _selectedPPV!;
-                    final title = _showTitleField ? _titleController.text : '';
-                    final type = _typeController.text;
-
-                    // Navigate to AddWrestlersPage with parameters
-                    Get.toNamed(AppRoutes.addWrestlers, parameters: {
-                      'payperview': payperview,
-                      'title': title,
-                      'type': type,
-                    });
-                  }
-                },
-                child: const Text('Avanti'),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+
+  void _addWrestler() {
+    setState(() {
+      wrestlers.add('');
+    });
+  }
+
+  void _removeWrestler(int index) {
+    if (wrestlers.length > 2) {
+      setState(() {
+        wrestlers.removeAt(index);
+      });
+    }
+  }
+
+  void _onWrestlerChanged(int index, String name) {
+    setState(() {
+      wrestlers[index] = name;
+    });
+  }
+
+  List<String> _getValidWrestlers() {
+    return wrestlers
+        .map((wrestler) => wrestler.trim())
+        .where((wrestler) => wrestler.isNotEmpty)
+        .toList();
+  }
+
+  void _saveMatchCard() async {
+    if (_formKey.currentState!.validate()) {
+      List<String> validWrestlers = _getValidWrestlers();
+      final payperview = _selectedPPV!;
+      final title = _showTitleField ? _titleController.text : '';
+      final type = _typeController.text;
+
+      await dbService.createMatchCard(
+          payperview, title, type, validWrestlers);
+    }
   }
 }
