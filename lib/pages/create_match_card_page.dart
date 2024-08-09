@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:wwe_bets/services/db_service.dart';
 import 'package:wwe_bets/style/text_style.dart';
@@ -5,7 +6,7 @@ import 'package:wwe_bets/widgets/create_match_card/ppv_input.dart';
 import 'package:wwe_bets/widgets/create_match_card/title_checkbox.dart';
 import 'package:wwe_bets/widgets/create_match_card/wrestler_input_row.dart';
 import '../widgets/common/input_decoration.dart';
-import '../widgets/common/custom_snackbar.dart';  // Importa il widget
+import '../widgets/common/custom_snackbar.dart';
 
 class CreateMatchCardPage extends StatefulWidget {
   const CreateMatchCardPage({super.key});
@@ -37,9 +38,11 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Text(
+                  AutoSizeText(
                     "Crea",
                     style: MemoText.createMatchCardButton,
+                    minFontSize: 16,
+                    maxLines: 1,
                   ),
                   const SizedBox(width: 8),
                   const Icon(
@@ -192,10 +195,6 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
       }
 
       List<String> validWrestlers = _getValidWrestlers();
-      if (validWrestlers.isEmpty) {
-        _showErrorSnackbar('Inserisci almeno un partecipante.');
-        return;
-      }
 
       final payperview = _selectedPPV!;
       final title = _showTitleField ? _titleController.text : '';

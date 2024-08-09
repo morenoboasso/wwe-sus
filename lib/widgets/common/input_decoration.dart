@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wwe_bets/style/text_style.dart';
 
 class InputDecorations {
-  static InputDecoration standard([String hint = 'Inserisci...']) {
+  static InputDecoration standard([String hint = 'Inserisci nome..']) {
     return InputDecoration(
       hintText: hint,
       filled: true,
