@@ -189,17 +189,11 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
 
   void _saveMatchCard() async {
     if (_formKey.currentState!.validate()) {
-      if (_selectedPPV == null || _selectedPPV!.isEmpty) {
-        _showErrorSnackbar('Seleziona un PPV.');
-        return;
-      }
-
       List<String> validWrestlers = _getValidWrestlers();
-
       final payperview = _selectedPPV!;
       final title = _showTitleField ? _titleController.text : '';
       final type = _typeController.text;
-
+      //db
       await dbService.createMatchCard(payperview, title, type, validWrestlers);
     } else {
       _showErrorSnackbar('Compila tutti i campi obbligatori.');
