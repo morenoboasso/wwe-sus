@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wwe_bets/style/text_style.dart';
 import '../../style/color_style.dart';
-import '../../style/text_style.dart';
 
 class LoginTextField extends StatelessWidget {
   final ValueChanged<String> onChanged;
@@ -24,11 +24,10 @@ class LoginTextField extends StatelessWidget {
         keyboardType: TextInputType.text,
         textAlign: TextAlign.left,
         textCapitalization: TextCapitalization.words,
-        style: TextStyleBets.inputTextLogin,
         // forma + hint
         decoration: InputDecoration(
           hintText: 'Inserisci il tuo nome...',
-          hintStyle: TextStyleBets.hintTextLogin,
+          hintStyle: MemoText.loginHint,
           filled: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: 20.0),
           fillColor: ColorsBets.whiteHD,

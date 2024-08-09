@@ -91,7 +91,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   },
                 ),
                 const SizedBox(height: 20),
-                Text("Accedi", style: TextStyleBets.titleBlue),
+                 Text("Accedi",style: MemoText.loginText,),
                 const SizedBox(height: 40),
                 SizedBox(
                   height: 60,
