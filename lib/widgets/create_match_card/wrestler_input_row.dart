@@ -1,11 +1,11 @@
-// lib/widgets/create_match_card/wrestler_input_row.dart
 import 'package:flutter/material.dart';
+import 'package:wwe_bets/style/color_style.dart';
 
 class WrestlerInputRow extends StatelessWidget {
   final int index1;
   final int index2;
   final List<String> wrestlers;
-  final void Function(int, String) onWrestlerChanged; // Cambia il tipo qui
+  final void Function(int, String) onWrestlerChanged;
   final void Function(int) onRemoveWrestler;
   final VoidCallback addWrestlerCallback;
   final bool canAddWrestler;
@@ -21,6 +21,26 @@ class WrestlerInputRow extends StatelessWidget {
     super.key,
   });
 
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      hintStyle: const TextStyle(color: Colors.black),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.black),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.black),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.black),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -29,9 +49,7 @@ class WrestlerInputRow extends StatelessWidget {
           children: [
             Expanded(
               child: TextFormField(
-                initialValue: index1 < wrestlers.length
-                    ? wrestlers[index1]
-                    : '',
+                initialValue: index1 < wrestlers.length ? wrestlers[index1] : '',
                 onChanged: (value) => onWrestlerChanged(index1, value),
                 validator: (index1 < 2)
                     ? (value) {
@@ -41,11 +59,7 @@ class WrestlerInputRow extends StatelessWidget {
                   return null;
                 }
                     : null,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 1),
-                  ),
-                ),
+                decoration: _inputDecoration(),
               ),
             ),
             if (index2 < wrestlers.length) ...[
@@ -62,17 +76,13 @@ class WrestlerInputRow extends StatelessWidget {
                     return null;
                   }
                       : null,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black, width: 1),
-                    ),
-                  ),
+                  decoration: _inputDecoration(),
                 ),
               ),
             ],
             if (wrestlers.length > 2) ...[
               IconButton(
-                icon: const Icon(Icons.remove_circle),
+                icon: const Icon(Icons.remove_circle, color: ColorsBets.whiteHD),
                 onPressed: () => onRemoveWrestler(index1 < wrestlers.length ? index1 : index2),
               ),
             ],
@@ -82,6 +92,15 @@ class WrestlerInputRow extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, // Text color
+                backgroundColor: Colors.transparent, // Fill color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5), // Less rounded corners
+                  side: const BorderSide(color: Colors.white,width: 2), // White border
+                ),
+                elevation: 5, // Shadow
+              ),
               onPressed: addWrestlerCallback,
               child: const Text('Aggiungi Wrestler'),
             ),

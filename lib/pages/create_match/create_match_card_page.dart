@@ -21,6 +21,27 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
   bool _showTitleField = false;
   List<String> wrestlers = ['', ''];
 
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      hintStyle: const TextStyle(color: Colors.black),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.black),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.black),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.black),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +49,7 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/bg.jpeg'),
                 fit: BoxFit.cover,
@@ -71,10 +92,7 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                               padding: const EdgeInsets.only(top: 8.0),
                               child: TextFormField(
                                 controller: _titleController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Inserisci il titolo..',
-                                  border: OutlineInputBorder(),
-                                ),
+                                decoration: _inputDecoration('Inserisci il titolo..'),
                               ),
                             ),
                           const SizedBox(height: 16),
@@ -82,10 +100,7 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _typeController,
-                            decoration: const InputDecoration(
-                              hintText: 'Inserisci il tipo di match..',
-                              border: OutlineInputBorder(),
-                            ),
+                            decoration: _inputDecoration('Inserisci il tipo di match..'),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Inserisci tipo di match.';
@@ -133,18 +148,22 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
               children: [
                 GestureDetector(
                   onTap: _saveMatchCard,
-                  child: const Row(
-                    children: [
-                      Text(
-                        "Crea",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      SizedBox(width: 8),
-                      Icon(
-                        Icons.arrow_forward,
-                        color: Colors.white,
-                      ),
-                    ],
+                  child: Container(
+                    color: Colors.transparent, // Aggiungi uno sfondo trasparente
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: const Row(
+                      children: [
+                        Text(
+                          "Crea",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

@@ -1,4 +1,3 @@
-// lib/widgets/create_match_card/title_checkbox.dart
 import 'package:flutter/material.dart';
 
 class TitleCheckbox extends StatelessWidget {
@@ -14,12 +13,21 @@ class TitleCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Distribuisce lo spazio tra i widget
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text('Titolo in palio'), // Etichetta a sinistra
+        const Text(
+          'Titolo in palio',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
         Checkbox(
+          hoverColor: Colors.transparent,
+          activeColor: Colors.transparent,
           value: isChecked,
           onChanged: onChanged,
+          checkColor: Colors.black,
+          fillColor: WidgetStateProperty.all(Colors.white),
         ), // Checkbox a destra
       ],
     );
