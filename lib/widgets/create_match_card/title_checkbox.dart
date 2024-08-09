@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wwe_bets/style/text_style.dart';
 
 class TitleCheckbox extends StatelessWidget {
   final bool isChecked;
@@ -15,11 +16,9 @@ class TitleCheckbox extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           'Titolo in palio',
-          style: TextStyle(
-            color: Colors.white,
-          ),
+          style: MemoText.createInputMainText,
         ),
         Checkbox(
           hoverColor: Colors.transparent,
@@ -28,7 +27,7 @@ class TitleCheckbox extends StatelessWidget {
           onChanged: onChanged,
           checkColor: Colors.black,
           fillColor: WidgetStateProperty.all(Colors.white),
-        ), // Checkbox a destra
+        ),
       ],
     );
   }

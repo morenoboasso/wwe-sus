@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wwe_bets/style/color_style.dart';
+import 'package:wwe_bets/style/text_style.dart';
+
+import '../common/input_decoration.dart';
 
 class WrestlerInputRow extends StatelessWidget {
   final int index1;
@@ -21,26 +24,6 @@ class WrestlerInputRow extends StatelessWidget {
     super.key,
   });
 
-  InputDecoration _inputDecoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      hintStyle: const TextStyle(color: Colors.black),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Colors.black),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Colors.black),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Colors.black),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -53,13 +36,13 @@ class WrestlerInputRow extends StatelessWidget {
                 onChanged: (value) => onWrestlerChanged(index1, value),
                 validator: (index1 < 2)
                     ? (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value == null || value.trim().isEmpty) {
                     return 'Inserisci wrestler.';
                   }
                   return null;
                 }
                     : null,
-                decoration: _inputDecoration(),
+                decoration: InputDecorations.standard(),
               ),
             ),
             if (index2 < wrestlers.length) ...[
@@ -76,7 +59,7 @@ class WrestlerInputRow extends StatelessWidget {
                     return null;
                   }
                       : null,
-                  decoration: _inputDecoration(),
+                  decoration: InputDecorations.standard(),
                 ),
               ),
             ],
@@ -93,16 +76,19 @@ class WrestlerInputRow extends StatelessWidget {
             padding: const EdgeInsets.only(top: 16.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, // Text color
-                backgroundColor: Colors.transparent, // Fill color
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5), // Less rounded corners
-                  side: const BorderSide(color: Colors.white,width: 2), // White border
+                  borderRadius: BorderRadius.circular(5),
+                  side: const BorderSide(color: Colors.white, width: 2),
                 ),
-                elevation: 5, // Shadow
+                elevation: 5,
               ),
               onPressed: addWrestlerCallback,
-              child: const Text('Aggiungi Wrestler'),
+              child: Text(
+                'Aggiungi Wrestler',
+                style: MemoText.addWrestlerButton,
+              ),
             ),
           ),
       ],

@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:wwe_bets/pages/login_page.dart';
-import '../pages/create_match/create_match_card_page.dart';
+import '../pages/create_match_card_page.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
 
 class AppRoutes {
