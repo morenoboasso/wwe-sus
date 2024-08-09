@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:wwe_bets/widgets/create_match_card/ppv_dropdown.dart';
-import '../../services/db_service.dart';
-import '../../widgets/create_match_card/title_checkbox.dart';
-import '../../widgets/create_match_card/wrestler_input_row.dart';
+import 'package:wwe_bets/services/db_service.dart';
+import 'package:wwe_bets/style/text_style.dart';
+import 'package:wwe_bets/widgets/create_match_card/ppv_input.dart';
+import 'package:wwe_bets/widgets/create_match_card/title_checkbox.dart';
+import 'package:wwe_bets/widgets/create_match_card/wrestler_input_row.dart';
+import '../widgets/common/input_decoration.dart';
+import '../widgets/common/custom_snackbar.dart';  // Importa il widget
 
 class CreateMatchCardPage extends StatefulWidget {
   const CreateMatchCardPage({super.key});
@@ -15,37 +18,41 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _typeController = TextEditingController();
-  DbService dbService = DbService();
+  final DbService dbService = DbService();
 
   String? _selectedPPV;
   bool _showTitleField = false;
   List<String> wrestlers = ['', ''];
 
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      filled: true,
-      fillColor: Colors.white,
-      hintStyle: const TextStyle(color: Colors.black),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Colors.black),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Colors.black),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Colors.black),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          GestureDetector(
+            onTap: _saveMatchCard,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Text(
+                    "Crea",
+                    style: MemoText.createMatchCardButton,
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.arrow_forward,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
           Container(
@@ -58,7 +65,7 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 children: <Widget>[
                   Expanded(
@@ -66,7 +73,7 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                       key: _formKey,
                       child: ListView(
                         children: <Widget>[
-                          const Text('PPV *', style: TextStyle(color: Colors.white)),
+                          Text('Nome PPV *', style: MemoText.createInputMainText),
                           const SizedBox(height: 8),
                           PPVInput(
                             selectedPPV: _selectedPPV,
@@ -76,15 +83,13 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                               });
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 22),
                           TitleCheckbox(
                             isChecked: _showTitleField,
                             onChanged: (value) {
-                              if (value != null) {
-                                setState(() {
-                                  _showTitleField = value;
-                                });
-                              }
+                              setState(() {
+                                _showTitleField = value!;
+                              });
                             },
                           ),
                           if (_showTitleField)
@@ -92,24 +97,30 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                               padding: const EdgeInsets.only(top: 8.0),
                               child: TextFormField(
                                 controller: _titleController,
-                                decoration: _inputDecoration('Inserisci il titolo..'),
+                                decoration: InputDecorations.standard('Inserisci il titolo..'),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Inserisci il titolo.';
+                                  }
+                                  return null;
+                                },
                               ),
                             ),
-                          const SizedBox(height: 16),
-                          const Text('Tipo di Match *', style: TextStyle(color: Colors.white)),
+                          const SizedBox(height: 22),
+                          Text('Tipo di Match *', style: MemoText.createInputMainText),
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _typeController,
-                            decoration: _inputDecoration('Inserisci il tipo di match..'),
+                            decoration: InputDecorations.standard('Inserisci il tipo di match..'),
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
+                              if (value == null || value.trim().isEmpty) {
                                 return 'Inserisci tipo di match.';
                               }
                               return null;
                             },
                           ),
-                          const SizedBox(height: 20),
-                          const Text('Inserisci Partecipanti *', style: TextStyle(color: Colors.white)),
+                          const SizedBox(height: 22),
+                          Text('Inserisci Partecipanti *', style: MemoText.createInputMainText),
                           const SizedBox(height: 8),
                           ListView.builder(
                             shrinkWrap: true,
@@ -139,34 +150,6 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                   ),
                 ],
               ),
-            ),
-          ),
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: _saveMatchCard,
-                  child: Container(
-                    color: Colors.transparent, // Aggiungi uno sfondo trasparente
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: const Row(
-                      children: [
-                        Text(
-                          "Crea",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        SizedBox(width: 8),
-                        Icon(
-                          Icons.arrow_forward,
-                          color: Colors.white,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
         ],
@@ -203,13 +186,32 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
 
   void _saveMatchCard() async {
     if (_formKey.currentState!.validate()) {
+      if (_selectedPPV == null || _selectedPPV!.isEmpty) {
+        _showErrorSnackbar('Seleziona un PPV.');
+        return;
+      }
+
       List<String> validWrestlers = _getValidWrestlers();
+      if (validWrestlers.isEmpty) {
+        _showErrorSnackbar('Inserisci almeno un partecipante.');
+        return;
+      }
+
       final payperview = _selectedPPV!;
       final title = _showTitleField ? _titleController.text : '';
       final type = _typeController.text;
 
-      await dbService.createMatchCard(
-          payperview, title, type, validWrestlers);
+      await dbService.createMatchCard(payperview, title, type, validWrestlers);
+    } else {
+      _showErrorSnackbar('Compila tutti i campi obbligatori.');
     }
+  }
+
+  void _showErrorSnackbar(String message) {
+    CustomSnackbar(
+      context: context,
+      message: message,
+      icon: Icons.report_gmailerrorred,
+    ).show();
   }
 }

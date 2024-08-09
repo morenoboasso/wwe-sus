@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../pages/create_match/create_match_card_page.dart';
+import '../pages/create_match_card_page.dart';
 import '../style/color_style.dart';
 class BottomNavigationBarWidget extends StatefulWidget {
   const BottomNavigationBarWidget({super.key});
