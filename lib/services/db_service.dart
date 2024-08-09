@@ -19,38 +19,17 @@ class DbService {
     }
   }
 
-  Future<void> createMatchCard(String payperview, String title, String type, List<String> participants) async {
+  Future<void> createMatchCard(String payperview, String title, String type, List<String> wrestlers) async {
     try {
-      await _firestore.collection('match_cards').add({
+      await _firestore.collection('matchCards').add({
         'payperview': payperview,
         'title': title,
         'type': type,
-        'participants': participants,
+        'wrestlers': wrestlers,
+        'createdAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
       debugPrint('Error creating match card: $e');
-    }
-  }
-
-  Future<void> voteForWrestler(String matchId, String userName, String wrestler) async {
-    try {
-      await _firestore.collection('votes').add({
-        'matchId': matchId,
-        'userName': userName,
-        'wrestler': wrestler,
-      });
-    } catch (e) {
-      debugPrint('Error voting for wrestler: $e');
-    }
-  }
-
-  Future<void> setMatchResult(String matchId, String winner) async {
-    try {
-      await _firestore.collection('match_cards').doc(matchId).update({
-        'winner': winner,
-      });
-    } catch (e) {
-      debugPrint('Error setting match result: $e');
     }
   }
 }
