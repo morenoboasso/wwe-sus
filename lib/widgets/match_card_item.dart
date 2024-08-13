@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wwe_bets/services/db_service.dart';
 import 'package:wwe_bets/widgets/common/custom_snackbar.dart';
+import 'winner_selection_dialog.dart'; // Importa il nuovo widget
 
 import '../style/color_style.dart';
 import '../style/text_style.dart';
@@ -36,6 +37,7 @@ class MatchCardItem extends StatefulWidget {
 class _MatchCardItemState extends State<MatchCardItem> {
   String? _selectedWrestler;
   String? userSelection;
+  String? matchWinner;
   int? voteCount;
   bool isLoading = true;
   bool hasError = false;
@@ -51,10 +53,12 @@ class _MatchCardItemState extends State<MatchCardItem> {
       final results = await Future.wait([
         widget.dbService.getUserSelection(widget.matchId),
         widget.dbService.getVoteCount(widget.matchId),
+        widget.dbService.getMatchWinner(widget.matchId), // Nuovo metodo
       ]);
       setState(() {
         userSelection = results[0] as String?;
         voteCount = results[1] as int;
+        matchWinner = results[2] as String?;
         isLoading = false;
       });
     } catch (e) {
@@ -76,6 +80,7 @@ class _MatchCardItemState extends State<MatchCardItem> {
     }
 
     final isSubmitted = widget.isVoteSubmitted[widget.matchId] ?? false;
+    final isMatchCompleted = matchWinner != null;
 
     return Card(
       elevation: 4.0,
@@ -154,103 +159,145 @@ class _MatchCardItemState extends State<MatchCardItem> {
                 ],
               ),
               const SizedBox(height: 20.0),
-              const Divider(color: Colors.black26, thickness: 2),
-              const SizedBox(height: 10.0),
-              if (userSelection == null && !isSubmitted)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('Scegli il Vincitore:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
-                    const SizedBox(width: 10),
-                    DropdownButton<String>(
-                      dropdownColor: ColorsBets.blackHD,
-                      iconEnabledColor: ColorsBets.whiteHD,
-                      style: const TextStyle(color: ColorsBets.whiteHD),
-                      value: _selectedWrestler,
-                      items: widget.selectableWrestlers.map<DropdownMenuItem<String>>((String wrestler) {
-                        return DropdownMenuItem<String>(
-                          value: wrestler,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text("• "),
-                                Text(
-                                  wrestler,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: ColorsBets.whiteHD,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.0,
+              if (isMatchCompleted) ...[
+                Text('Vincitore:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
+                Text(matchWinner ?? '', style: MemoText.thirdRowMatchInfo),
+                const SizedBox(height: 10.0),
+                Text('Hai votato:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
+                Text(userSelection ?? 'Nessun voto', style: MemoText.thirdRowMatchInfo),
+              ] else ...[
+                const Divider(color: Colors.black26, thickness: 2),
+                const SizedBox(height: 10.0),
+                if (userSelection == null && !isSubmitted)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('Scegli il Vincitore:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
+                      const SizedBox(width: 10),
+                      DropdownButton<String>(
+                        dropdownColor: ColorsBets.blackHD,
+                        iconEnabledColor: ColorsBets.whiteHD,
+                        style: const TextStyle(color: ColorsBets.whiteHD),
+                        value: _selectedWrestler,
+                        items: widget.selectableWrestlers.map<DropdownMenuItem<String>>((String wrestler) {
+                          return DropdownMenuItem<String>(
+                            value: wrestler,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text("• "),
+                                  Text(
+                                    wrestler,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: ColorsBets.whiteHD,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.0,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: isSubmitted ? null : (String? newValue) {
-                        setState(() {
-                          _selectedWrestler = newValue;
-                        });
-                      },
-                      hint: Text('Seleziona il vincitore', style: MemoText.thirdRowMatchInfo),
-                    ),
-                    const SizedBox(height: 12.0),
-                    ElevatedButton(
-                      onPressed: isSubmitted ? null : () async {
-                        if (_selectedWrestler != null && widget.selectableWrestlers.contains(_selectedWrestler)) {
-                          try {
-                            await widget.dbService.saveUserSelection(widget.matchId, _selectedWrestler!);
-                            widget.onSelectionSaved(widget.matchId, _selectedWrestler!);
-                          } catch (e) {
-                            debugPrint('Error saving selection: $e');
+                          );
+                        }).toList(),
+                        onChanged: isSubmitted ? null : (String? newValue) {
+                          setState(() {
+                            _selectedWrestler = newValue;
+                          });
+                        },
+                        hint: Text('Seleziona il vincitore', style: MemoText.thirdRowMatchInfo),
+                      ),
+                      const SizedBox(height: 12.0),
+                      ElevatedButton(
+                        onPressed: isSubmitted ? null : () async {
+                          if (_selectedWrestler != null && widget.selectableWrestlers.contains(_selectedWrestler)) {
+                            try {
+                              await widget.dbService.saveUserSelection(widget.matchId, _selectedWrestler!);
+                              widget.onSelectionSaved(widget.matchId, _selectedWrestler!);
+                              // Ricarica i dati
+                              await _fetchData();
+                            } catch (e) {
+                              debugPrint('Error saving selection: $e');
+                              CustomSnackbar(
+                                color: Colors.red,
+                                context: context,
+                                message: 'Errore nel salvataggio della selezione.',
+                                icon: Icons.report_gmailerrorred,
+                              ).show();
+                            }
+                          } else {
                             CustomSnackbar(
                               color: Colors.red,
                               context: context,
-                              message: 'Errore nel salvataggio della selezione.',
+                              message: 'Attenzione! Scegli almeno un vincitore.',
                               icon: Icons.report_gmailerrorred,
                             ).show();
                           }
-                        } else {
-                          CustomSnackbar(
-                            color: Colors.red,
-                            context: context,
-                            message: 'Attenzione! Scegli almeno un vincitore.',
-                            icon: Icons.report_gmailerrorred,
-                          ).show();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        side: const BorderSide(color: Colors.black, width: 2.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          side: const BorderSide(color: Colors.black, width: 2.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
+                        child: const Text(
+                          'Conferma Pronostico',
+                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      child: const Text(
-                        'Conferma Pronostico',
-                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    ],
+                  )
+                else if (userSelection != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('Hai votato:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
+                      Text(userSelection ?? '', style: TextStyle(color: Colors.white)),
+                      const SizedBox(height: 12.0),
+                      ElevatedButton(
+                        onPressed: () => _showWinnerSelectionDialog(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          side: const BorderSide(color: Colors.black, width: 2.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Seleziona Vincitore',
+                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              else
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('Hai votato:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
-                    Text(userSelection ?? '', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
+                    ],
+                  ),
+              ],
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showWinnerSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return WinnerSelectionDialog(
+          matchId: widget.matchId,
+          selectableWrestlers: widget.selectableWrestlers,
+          dbService: widget.dbService,
+          onSelectionSaved: (matchId, winner) async {
+            await _fetchData(); // Ricarica i dati dopo aver selezionato un vincitore
+          },
+        );
+      },
     );
   }
 }

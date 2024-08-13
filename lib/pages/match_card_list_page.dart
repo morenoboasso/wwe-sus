@@ -4,7 +4,6 @@ import 'package:wwe_bets/services/db_service.dart';
 import 'package:wwe_bets/style/color_style.dart';
 import 'package:wwe_bets/style/text_style.dart';
 import 'package:wwe_bets/widgets/common/custom_snackbar.dart';
-
 import '../widgets/match_card_item.dart';
 
 class MatchCardListPage extends StatefulWidget {
