@@ -79,16 +79,53 @@ class DbService {
   }
 
   Future<int> getVoteCount(String matchId) async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('userSelections')
-          .where('matchId', isEqualTo: matchId)
-          .get();
+    final querySnapshot = await _firestore
+        .collection('userSelections')
+        .where('matchId', isEqualTo: matchId)
+        .get();
 
-      return querySnapshot.size;
+    return querySnapshot.docs.length;
+  }
+
+  Future<String?> getMatchWinner(String matchId) async {
+    final doc = await _firestore.collection('matchCards').doc(matchId).get();
+    return doc.data()?['winner'] as String?;
+  }
+
+  Future<void> updateMatchResult(String matchId, String winner) async {
+    try {
+      await _firestore.collection('matchCards').doc(matchId).update({
+        'winner': winner,
+        'status': 'completed', // Example field to mark match as completed
+      });
     } catch (e) {
-      debugPrint('Error getting vote count: $e');
-      return 0;
+      debugPrint('Error updating match result: $e');
+    }
+  }
+
+  Future<void> updateUserScore(String matchId, String winner) async {
+    final userName = await _storage.read('userName');
+
+    if (userName != null) {
+      try {
+        final querySnapshot = await _firestore
+            .collection('userSelections')
+            .where('matchId', isEqualTo: matchId)
+            .where('selectedWrestler', isEqualTo: winner)
+            .get();
+
+        final usersWhoWon = querySnapshot.docs.map((doc) => doc['userName']).toSet();
+
+        for (final user in usersWhoWon) {
+          await _firestore.collection('users').doc(user).update({
+            'points': FieldValue.increment(1),
+          });
+        }
+      } catch (e) {
+        debugPrint('Error updating user score: $e');
+      }
+    } else {
+      debugPrint('No user name found in storage.');
     }
   }
 }
