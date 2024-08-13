@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../pages/create_match_card_page.dart';
+import '../pages/match_card_list_page.dart';
 import '../style/color_style.dart';
 class BottomNavigationBarWidget extends StatefulWidget {
   const BottomNavigationBarWidget({super.key});
@@ -12,6 +13,7 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const CreateMatchCardPage(),
+    const MatchCardListPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -42,7 +44,7 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
               unselectedIconTheme: const IconThemeData(size: 24),
               items: <BottomNavigationBarItem>[
                 _buildNavigationBarItem(Icons.add_box, 'Crea', 0),
-                _buildNavigationBarItem(Icons.add_box, 'Crea', 1),
+                _buildNavigationBarItem(Icons.how_to_vote, 'Match', 1),
                 _buildNavigationBarItem(Icons.add_box, 'Crea', 2),
 
               ],
