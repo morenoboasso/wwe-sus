@@ -77,4 +77,18 @@ class DbService {
 
     return null;
   }
+
+  Future<int> getVoteCount(String matchId) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('userSelections')
+          .where('matchId', isEqualTo: matchId)
+          .get();
+
+      return querySnapshot.size;
+    } catch (e) {
+      debugPrint('Error getting vote count: $e');
+      return 0;
+    }
+  }
 }
