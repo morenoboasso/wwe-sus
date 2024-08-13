@@ -85,8 +85,8 @@ class _MatchCardItemState extends State<MatchCardItem> {
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlueAccent],
+          gradient:  LinearGradient(
+            colors: [Colors.blue.withOpacity(0.7), Colors.lightBlueAccent.withOpacity(0.7)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -160,13 +160,13 @@ class _MatchCardItemState extends State<MatchCardItem> {
                 ],
               ),
               const SizedBox(height: 20.0),
-              Divider(color: Colors.grey.shade400, thickness: 1),
+              const Divider(color: Colors.black26, thickness: 2),
               const SizedBox(height: 10.0),
               if (userSelection == null && !isSubmitted)
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
+                    Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text('Scegli il Vincitore:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
@@ -182,11 +182,13 @@ class _MatchCardItemState extends State<MatchCardItem> {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                                 child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     const Text("•"),
-                                    const SizedBox(width: 4.0),
                                     Text(
                                       wrestler,
+                                      textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         color: ColorsBets.whiteHD,
                                         fontSize: 14,

@@ -21,6 +21,9 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate the padding dynamically based on screen size
+    final double horizontalPadding = MediaQuery.of(context).size.width * 0.04;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Prossimi Match', style: MemoText.createMatchCardButton),
@@ -39,49 +42,69 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
             ),
           ),
           SafeArea(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('matchCards').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return   Center(child: Text('Qualcosa è andato storto!',style: MemoText.noMatches,));
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: ColorsBets.whiteHD,));
-                }
-
-                final matchCards = snapshot.data!.docs;
-
-                if (matchCards.isEmpty) {
-                  return  Center(child: Text('Nessun Match disponibile, creane uno!',style: MemoText.noMatches,));
-                }
-
-                return ListView.builder(
-                  itemCount: matchCards.length,
-                  itemBuilder: (context, index) {
-                    final matchCard = matchCards[index];
-                    final matchId = matchCard.id;
-                    final payperview = matchCard['payperview'] as String;
-                    final title = matchCard['title'] as String;
-                    final type = matchCard['type'] as String;
-                    final wrestlers = List<String>.from(matchCard['wrestlers']);
-
-                    final selectableWrestlers = List<String>.from(wrestlers);
-                    selectableWrestlers.add('No Contest');
-
-                    return MatchCardItem(
-                      matchId: matchId,
-                      payperview: payperview,
-                      title: title,
-                      type: type,
-                      wrestlers: wrestlers,
-                      selectableWrestlers: selectableWrestlers,
-                      dbService: dbService,
-                      isVoteSubmitted: isVoteSubmitted,
-                      onSelectionSaved: _onSelectionSaved,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('matchCards').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Qualcosa è andato storto!',
+                        style: MemoText.noMatches,
+                      ),
                     );
-                  },
-                );
-              },
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: ColorsBets.whiteHD,
+                      ),
+                    );
+                  }
+
+                  final matchCards = snapshot.data!.docs;
+
+                  if (matchCards.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'Nessun Match disponibile, creane uno!',
+                        style: MemoText.noMatches,
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: matchCards.length,
+                    itemBuilder: (context, index) {
+                      final matchCard = matchCards[index];
+                      final matchId = matchCard.id;
+                      final payperview = matchCard['payperview'] as String;
+                      final title = matchCard['title'] as String;
+                      final type = matchCard['type'] as String;
+                      final wrestlers = List<String>.from(matchCard['wrestlers']);
+
+                      final selectableWrestlers = List<String>.from(wrestlers);
+                      selectableWrestlers.add('No Contest');
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: MatchCardItem(
+                          matchId: matchId,
+                          payperview: payperview,
+                          title: title,
+                          type: type,
+                          wrestlers: wrestlers,
+                          selectableWrestlers: selectableWrestlers,
+                          dbService: dbService,
+                          isVoteSubmitted: isVoteSubmitted,
+                          onSelectionSaved: _onSelectionSaved,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ],
