@@ -22,10 +22,13 @@ class MemoText {
 
   //match card items
   static TextStyle get ppvText => const TextStyle(
-      color: ColorsBets.blackHD, fontSize: 16, fontWeight: FontWeight.w600
+      color: ColorsBets.whiteHD, fontSize: 20, fontWeight: FontWeight.bold
   );
   static TextStyle get secondRowMatchInfo => const TextStyle(
-      color: ColorsBets.blackHD, fontSize: 14, fontWeight: FontWeight.bold
+      color: ColorsBets.whiteHD, fontSize: 18, fontWeight: FontWeight.bold
+  );
+  static TextStyle get thirdRowMatchInfo => const TextStyle(
+      color: ColorsBets.whiteHD, fontSize: 14
   );
   static TextStyle get noMatches => const TextStyle(color: ColorsBets.whiteHD,fontSize: 14);
 }
