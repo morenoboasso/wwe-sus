@@ -85,7 +85,7 @@ class _MatchCardItemState extends State<MatchCardItem> {
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Container(
         decoration: BoxDecoration(
-          gradient:  LinearGradient(
+          gradient: LinearGradient(
             colors: [Colors.blue.withOpacity(0.7), Colors.lightBlueAccent.withOpacity(0.7)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -101,7 +101,7 @@ class _MatchCardItemState extends State<MatchCardItem> {
               Center(
                 child: Text(
                   widget.payperview,
-                  style: MemoText.ppvText
+                  style: MemoText.ppvText,
                 ),
               ),
               const SizedBox(height: 20.0),
@@ -110,13 +110,8 @@ class _MatchCardItemState extends State<MatchCardItem> {
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Row(
-                        children: [
-                          Text('Match:', style: MemoText.secondRowMatchInfo),
-                        ],
-                      ),
+                      Text('Match:', style: MemoText.secondRowMatchInfo),
                       Text(widget.type, style: MemoText.thirdRowMatchInfo),
                     ],
                   ),
@@ -129,7 +124,6 @@ class _MatchCardItemState extends State<MatchCardItem> {
                       ],
                     ),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text('Voti: ', style: MemoText.secondRowMatchInfo),
                       Text('$voteCount/2', style: MemoText.secondRowMatchInfo),
@@ -166,102 +160,90 @@ class _MatchCardItemState extends State<MatchCardItem> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Scegli il Vincitore:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
-                        const SizedBox(width: 10),
-                        DropdownButton<String>(
-                          dropdownColor: ColorsBets.blackHD,
-                          iconEnabledColor: ColorsBets.whiteHD,
-                          style:  const TextStyle(color: ColorsBets.whiteHD),
-                          value: _selectedWrestler,
-                          items: widget.selectableWrestlers.map<DropdownMenuItem<String>>((String wrestler) {
-                            return DropdownMenuItem<String>(
-                              value: wrestler,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text("•"),
-                                    Text(
-                                      wrestler,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        color: ColorsBets.whiteHD,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 1.0,
-                                      ),
-                                    ),
-                                  ],
+                    Text('Scegli il Vincitore:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
+                    const SizedBox(width: 10),
+                    DropdownButton<String>(
+                      dropdownColor: ColorsBets.blackHD,
+                      iconEnabledColor: ColorsBets.whiteHD,
+                      style: const TextStyle(color: ColorsBets.whiteHD),
+                      value: _selectedWrestler,
+                      items: widget.selectableWrestlers.map<DropdownMenuItem<String>>((String wrestler) {
+                        return DropdownMenuItem<String>(
+                          value: wrestler,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text("• "),
+                                Text(
+                                  wrestler,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: ColorsBets.whiteHD,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.0,
+                                  ),
                                 ),
-                              ),
-                            );
-
-                          }).toList(),
-                          onChanged: isSubmitted ? null : (String? newValue) {
-                            setState(() {
-                              _selectedWrestler = newValue;
-                            });
-                          },
-                          isExpanded: false,
-                          hint:  Text('Seleziona il vincitore',style: MemoText.thirdRowMatchInfo),
-                        ),
-                      ],
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: isSubmitted ? null : (String? newValue) {
+                        setState(() {
+                          _selectedWrestler = newValue;
+                        });
+                      },
+                      hint: Text('Seleziona il vincitore', style: MemoText.thirdRowMatchInfo),
                     ),
                     const SizedBox(height: 12.0),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: isSubmitted ? null : () async {
-                          if (_selectedWrestler != null && widget.selectableWrestlers.contains(_selectedWrestler)) {
-                            try {
-                              await widget.dbService.saveUserSelection(widget.matchId, _selectedWrestler!);
-                              widget.onSelectionSaved(widget.matchId, _selectedWrestler!);
-                            } catch (e) {
-                              debugPrint('Error saving selection: $e');
-                              CustomSnackbar(
-                                color: Colors.red,
-                                context: context,
-                                message: 'Errore nel salvataggio della selezione.',
-                                icon: Icons.report_gmailerrorred,
-                              ).show();
-                            }
-                          } else {
+                    ElevatedButton(
+                      onPressed: isSubmitted ? null : () async {
+                        if (_selectedWrestler != null && widget.selectableWrestlers.contains(_selectedWrestler)) {
+                          try {
+                            await widget.dbService.saveUserSelection(widget.matchId, _selectedWrestler!);
+                            widget.onSelectionSaved(widget.matchId, _selectedWrestler!);
+                          } catch (e) {
+                            debugPrint('Error saving selection: $e');
                             CustomSnackbar(
                               color: Colors.red,
                               context: context,
-                              message: 'Attenzione! Scegli almeno un vincitore.',
+                              message: 'Errore nel salvataggio della selezione.',
                               icon: Icons.report_gmailerrorred,
                             ).show();
                           }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          side: const BorderSide(color: Colors.black, width: 2.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          elevation: 0,
+                        } else {
+                          CustomSnackbar(
+                            color: Colors.red,
+                            context: context,
+                            message: 'Attenzione! Scegli almeno un vincitore.',
+                            icon: Icons.report_gmailerrorred,
+                          ).show();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        side: const BorderSide(color: Colors.black, width: 2.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
-                        child: const Text(
-                          'Conferma Pronostico',
-                          style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
-                        ),
+                        elevation: 0,
                       ),
-
+                      child: const Text(
+                        'Conferma Pronostico',
+                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 )
               else
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('Hai votato:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
-                    const SizedBox(width: 10),
                     Text(userSelection ?? '', style: TextStyle(color: Colors.white)),
                   ],
                 ),

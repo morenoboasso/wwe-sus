@@ -16,12 +16,15 @@ class MatchCardListPage extends StatefulWidget {
 
 class _MatchCardListPageState extends State<MatchCardListPage> {
   final DbService dbService = DbService();
-  Map<String, String> selectedWrestlers = {};
   Map<String, bool> isVoteSubmitted = {};
+
+  Future<List<QueryDocumentSnapshot>> _fetchMatchCards() async {
+    final snapshot = await FirebaseFirestore.instance.collection('matchCards').get();
+    return snapshot.docs;
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Calculate the padding dynamically based on screen size
     final double horizontalPadding = MediaQuery.of(context).size.width * 0.04;
 
     return Scaffold(
@@ -44,8 +47,8 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
           SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('matchCards').snapshots(),
+              child: FutureBuilder<List<QueryDocumentSnapshot>>(
+                future: _fetchMatchCards(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return Center(
@@ -63,7 +66,7 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
                     );
                   }
 
-                  final matchCards = snapshot.data!.docs;
+                  final matchCards = snapshot.data ?? [];
 
                   if (matchCards.isEmpty) {
                     return Center(
@@ -84,8 +87,7 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
                       final type = matchCard['type'] as String;
                       final wrestlers = List<String>.from(matchCard['wrestlers']);
 
-                      final selectableWrestlers = List<String>.from(wrestlers);
-                      selectableWrestlers.add('No Contest');
+                      final selectableWrestlers = List<String>.from(wrestlers)..add('No Contest');
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
