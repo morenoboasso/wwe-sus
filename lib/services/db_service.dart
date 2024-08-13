@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get_storage/get_storage.dart';
 
 class DbService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GetStorage _storage = GetStorage();
 
   Future<bool> checkUserNameExists(String userName) async {
     try {
@@ -31,5 +33,48 @@ class DbService {
     } catch (e) {
       debugPrint('Error creating match card: $e');
     }
+  }
+
+  Future<void> saveUserSelection(String matchId, String selectedWrestler) async {
+    final userName = _storage.read('userName');
+
+    if (userName != null) {
+      try {
+        await _firestore.collection('userSelections').add({
+          'userName': userName,
+          'matchId': matchId,
+          'selectedWrestler': selectedWrestler,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      } catch (e) {
+        debugPrint('Error saving user selection: $e');
+      }
+    } else {
+      debugPrint('No user name found in storage.');
+    }
+  }
+
+  // Nuovo metodo per ottenere la selezione dell'utente
+  Future<String?> getUserSelection(String matchId) async {
+    final userName = _storage.read('userName');
+
+    if (userName != null) {
+      try {
+        final querySnapshot = await _firestore
+            .collection('userSelections')
+            .where('userName', isEqualTo: userName)
+            .where('matchId', isEqualTo: matchId)
+            .limit(1)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          return querySnapshot.docs.first['selectedWrestler'] as String?;
+        }
+      } catch (e) {
+        debugPrint('Error getting user selection: $e');
+      }
+    }
+
+    return null;
   }
 }

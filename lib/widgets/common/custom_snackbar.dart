@@ -5,10 +5,13 @@ class CustomSnackbar {
   final String message;
   final IconData icon;
 
+  final Color color;
+
   CustomSnackbar({
     required this.context,
     required this.message,
     required this.icon,
+    required this.color,
   });
 
   void show() {
@@ -23,7 +26,7 @@ class CustomSnackbar {
         ),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-        backgroundColor: Colors.red,
+        backgroundColor: color,
         elevation: 1,
       ),
     );

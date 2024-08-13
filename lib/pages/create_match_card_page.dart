@@ -202,6 +202,7 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
 
   void _showErrorSnackbar(String message) {
     CustomSnackbar(
+      color: Colors.red,
       context: context,
       message: message,
       icon: Icons.report_gmailerrorred,
