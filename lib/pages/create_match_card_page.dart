@@ -119,6 +119,9 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Inserisci tipo di match.';
                               }
+                              if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
+                                return 'Il tipo di match può contenere solo lettere e spazi.';
+                              }
                               return null;
                             },
                           ),
@@ -182,19 +185,40 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
 
   List<String> _getValidWrestlers() {
     return wrestlers
-        .map((wrestler) => wrestler.trim())
+        .map((wrestler) => _capitalizeFirstLetterOfEachWord(wrestler.trim()))
         .where((wrestler) => wrestler.isNotEmpty)
         .toList();
+  }
+
+  String _capitalizeFirstLetterOfEachWord(String input) {
+    return input
+        .split(' ')
+        .map((word) => word.isEmpty
+        ? ''
+        : word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
   }
 
   void _saveMatchCard() async {
     if (_formKey.currentState!.validate()) {
       List<String> validWrestlers = _getValidWrestlers();
-      final payperview = _selectedPPV!;
-      final title = _showTitleField ? _titleController.text : '';
-      final type = _typeController.text;
+      final payperview = _capitalizeFirstLetterOfEachWord(_selectedPPV ?? '');
+      final title = _showTitleField ? _capitalizeFirstLetterOfEachWord(_titleController.text) : '';
+      final type = _capitalizeFirstLetterOfEachWord(_typeController.text);
+
       //db
       await dbService.createMatchCard(payperview, title, type, validWrestlers);
+
+      // Clear the form and show success message
+      _formKey.currentState!.reset();
+      setState(() {
+        _titleController.clear();
+        _typeController.clear();
+        _selectedPPV = null;
+        _showTitleField = false;
+        wrestlers = ['', ''];
+      });
+      _showSuccessSnackbar('Match creato con successo!');
     } else {
       _showErrorSnackbar('Compila tutti i campi obbligatori.');
     }
@@ -206,6 +230,15 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
       context: context,
       message: message,
       icon: Icons.report_gmailerrorred,
+    ).show();
+  }
+
+  void _showSuccessSnackbar(String message) {
+    CustomSnackbar(
+      color: Colors.green,
+      context: context,
+      message: message,
+      icon: Icons.check_circle,
     ).show();
   }
 }
