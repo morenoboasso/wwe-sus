@@ -114,7 +114,6 @@ class _MatchCardItemState extends State<MatchCardItem> {
               MatchInfoRow(
                 title: widget.title,
                 type: widget.type,
-                voteCount: voteCount,
               ),
               const SizedBox(height: 20.0),
               WrestlerList(wrestlers: widget.wrestlers),

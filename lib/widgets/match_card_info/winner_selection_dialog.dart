@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart'; // Aggiungi questa importazione
 import 'package:wwe_bets/services/db_service.dart';
 
 class WinnerSelectionDialog extends StatefulWidget {
@@ -25,7 +26,7 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.transparent, // Set transparent background to see the shadow
+      backgroundColor: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.lightBlueAccent,
@@ -35,7 +36,7 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
               color: Colors.black.withOpacity(0.5),
               spreadRadius: 5,
               blurRadius: 15,
-              offset: const Offset(0, 3), // changes position of shadow
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -45,13 +46,16 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              const Text(
+              const AutoSizeText(
                 'Seleziona Vincitore',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
+                minFontSize: 14,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 20.0),
               DropdownButton<String>(
@@ -65,10 +69,13 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("• ", style: TextStyle(color: Colors.white)),
-                          Text(
+                          const AutoSizeText("• ", style: TextStyle(color: Colors.white)),
+                          AutoSizeText(
                             wrestler,
                             style: const TextStyle(color: Colors.white),
+                            minFontSize: 14,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
@@ -80,9 +87,12 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
                     _selectedWrestler = newValue;
                   });
                 },
-                hint: const Text(
+                hint: const AutoSizeText(
                   'Seleziona il vincitore',
                   style: TextStyle(color: Colors.white),
+                  minFontSize: 14,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 dropdownColor: Colors.black,
               ),
@@ -94,9 +104,12 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: const Text(
+                    child: const AutoSizeText(
                       'Annulla',
                       style: TextStyle(color: Colors.white),
+                      minFontSize: 14,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   ElevatedButton(
@@ -105,13 +118,17 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
                         try {
                           await widget.dbService.updateMatchResult(widget.matchId, _selectedWrestler!);
                           await widget.dbService.updateUserScore(widget.matchId, _selectedWrestler!);
-                          widget.onSelectionSaved(widget.matchId, _selectedWrestler!); // Richiama il callback per ricaricare i dati
+                          widget.onSelectionSaved(widget.matchId, _selectedWrestler!);
                           Navigator.of(context).pop();
                         } catch (e) {
-                          // Gestisci errori di salvataggio
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Errore nel salvataggio della selezione.'),
+                              content: AutoSizeText(
+                                'Errore nel salvataggio della selezione.',
+                                minFontSize: 14,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -119,16 +136,19 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent, // Background color of the button
-                        side: const BorderSide(color: Colors.black, width: 2.0), // Border color and width
+                        backgroundColor: Colors.transparent,
+                        side: const BorderSide(color: Colors.black, width: 2.0),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0), // Border radius
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                         elevation: 0
                     ),
-                    child: const Text(
+                    child: const AutoSizeText(
                       'Conferma',
                       style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      minFontSize: 14,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

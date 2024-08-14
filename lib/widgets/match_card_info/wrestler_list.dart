@@ -12,22 +12,31 @@ class WrestlerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Column(
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: wrestlers
-              .take((wrestlers.length / 2).ceil())
-              .map((wrestler) => Text('• $wrestler', style: MemoText.thirdRowMatchInfo))
-              .toList(),
+        Text(
+          'Partecipanti:',
+          style: MemoText.secondRowMatchInfo,
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: wrestlers
-              .skip((wrestlers.length / 2).ceil())
-              .map((wrestler) => Text('• $wrestler', style: MemoText.thirdRowMatchInfo))
-              .toList(),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: wrestlers
+                  .take((wrestlers.length / 2).ceil())
+                  .map((wrestler) => Text('• $wrestler', style: MemoText.thirdRowMatchInfo))
+                  .toList(),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: wrestlers
+                  .skip((wrestlers.length / 2).ceil())
+                  .map((wrestler) => Text('• $wrestler', style: MemoText.thirdRowMatchInfo))
+                  .toList(),
+            ),
+          ],
         ),
       ],
     );
