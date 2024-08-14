@@ -112,7 +112,7 @@ class VoteSection extends StatelessWidget {
               ElevatedButton(
                 onPressed: onShowWinnerSelectionDialog,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: Colors.amber,
                   side: const BorderSide(color: Colors.black, width: 2.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),

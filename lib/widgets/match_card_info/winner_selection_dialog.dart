@@ -35,7 +35,7 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
               color: Colors.black.withOpacity(0.5),
               spreadRadius: 5,
               blurRadius: 15,
-              offset: Offset(0, 3), // changes position of shadow
+              offset: const Offset(0, 3), // changes position of shadow
             ),
           ],
         ),
@@ -45,7 +45,7 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Text(
+              const Text(
                 'Seleziona Vincitore',
                 style: TextStyle(
                   color: Colors.white,
