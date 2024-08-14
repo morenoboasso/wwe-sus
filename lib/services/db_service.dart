@@ -131,4 +131,21 @@ class DbService {
       debugPrint('No user name found in storage.');
     }
   }
+  Future<List<Map<String, dynamic>>> getUserRanking() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .orderBy('points', descending: true)
+          .get();
+
+      return querySnapshot.docs.map((doc) => {
+        'name': doc['name'],
+        'points': doc['points'],
+        'pfp': doc['pfp'],
+      }).toList();
+    } catch (e) {
+      debugPrint('Error getting user ranking: $e');
+      return [];
+    }
+  }
 }

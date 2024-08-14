@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:wwe_bets/pages/user_ranking_page.dart';
 import '../pages/create_match_card_page.dart';
 import '../pages/match_card_list_page.dart';
 import '../style/color_style.dart';
+
 class BottomNavigationBarWidget extends StatefulWidget {
   const BottomNavigationBarWidget({super.key});
   @override
@@ -12,8 +14,9 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
   int _selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
-    const CreateMatchCardPage(),
-    const MatchCardListPage(),
+    const MatchCardListPage(),  // Swapped position with CreateMatchCardPage
+    const CreateMatchCardPage(), // Swapped position with MatchCardListPage
+     RankingPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -43,10 +46,9 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
               selectedIconTheme: const IconThemeData(size: 28),
               unselectedIconTheme: const IconThemeData(size: 24),
               items: <BottomNavigationBarItem>[
-                _buildNavigationBarItem(Icons.add_box, 'Crea', 0),
-                _buildNavigationBarItem(Icons.how_to_vote, 'Match', 1),
-                _buildNavigationBarItem(Icons.add_box, 'Crea', 2),
-
+                _buildNavigationBarItem(Icons.how_to_vote, 'Match', 0), // Swapped position with Crea
+                _buildNavigationBarItem(Icons.add_box, 'Crea', 1), // Swapped position with Match
+                _buildNavigationBarItem(Icons.leaderboard, 'Classifica', 2),
               ],
               currentIndex: _selectedIndex,
               selectedItemColor: ColorsBets.blackHD,
