@@ -16,10 +16,110 @@ class MatchCardListPage extends StatefulWidget {
 class _MatchCardListPageState extends State<MatchCardListPage> {
   final DbService dbService = DbService();
   Map<String, bool> isVoteSubmitted = {};
+  late Future<List<QueryDocumentSnapshot>> _matchCardsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _matchCardsFuture = _fetchMatchCards();
+  }
 
   Future<List<QueryDocumentSnapshot>> _fetchMatchCards() async {
     final snapshot = await FirebaseFirestore.instance.collection('matchCards').get();
     return snapshot.docs;
+  }
+
+  Future<void> _deleteAllMatchCards() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('matchCards').get();
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (var doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+      _showSuccessSnackbar('Tutti i match sono stati eliminati con successo!');
+
+      // Aggiorna il Future dopo aver eliminato tutti i match
+      setState(() {
+        _matchCardsFuture = _fetchMatchCards();
+      });
+    } catch (e) {
+      _showErrorSnackbar('Errore durante l\'eliminazione dei match!');
+    }
+  }
+
+  void _showSuccessSnackbar(String message) {
+    CustomSnackbar(
+      color: Colors.green,
+      context: context,
+      message: message,
+      icon: Icons.check_circle,
+    ).show();
+  }
+
+  void _showErrorSnackbar(String message) {
+    CustomSnackbar(
+      color: Colors.red,
+      context: context,
+      message: message,
+      icon: Icons.error,
+    ).show();
+  }
+
+  void _confirmDeleteAllMatchCards() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.warning, color: Colors.red, size: 30),
+              SizedBox(width: 10),
+              Expanded(child: Text('Elimina tutti i match')),
+            ],
+          ),
+          content: Text(
+            'Sei sicuro di voler eliminare tutti i match? Questa azione non può essere annullata.',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey, backgroundColor: Colors.grey[200],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: Text('Annulla', style: TextStyle(color: ColorsBets.blackHD),),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            SizedBox(width: 10),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: Text('Elimina', style: TextStyle(color: ColorsBets.whiteHD),),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteAllMatchCards();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -31,6 +131,12 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
         title: Text('Prossimi Match', style: MemoText.createMatchCardButton),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_forever,color: ColorsBets.whiteHD,),
+            onPressed: _confirmDeleteAllMatchCards,
+          ),
+        ],
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
@@ -47,7 +153,7 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: FutureBuilder<List<QueryDocumentSnapshot>>(
-                future: _fetchMatchCards(),
+                future: _matchCardsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return Center(
@@ -118,14 +224,5 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
       isVoteSubmitted[matchId] = true;
     });
     _showSuccessSnackbar('Hai votato $selectedWrestler con successo!');
-  }
-
-  void _showSuccessSnackbar(String message) {
-    CustomSnackbar(
-      color: Colors.green,
-      context: context,
-      message: message,
-      icon: Icons.check_circle,
-    ).show();
   }
 }

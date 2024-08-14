@@ -6,6 +6,10 @@ class DbService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GetStorage _storage = GetStorage();
 
+  Future<String?> getUserName() async {
+    return _storage.read('userName');
+  }
+
   Future<bool> checkUserNameExists(String userName) async {
     try {
       final querySnapshot = await _firestore
@@ -54,7 +58,6 @@ class DbService {
     }
   }
 
-  // Nuovo metodo per ottenere la selezione dell'utente
   Future<String?> getUserSelection(String matchId) async {
     final userName = _storage.read('userName');
 
