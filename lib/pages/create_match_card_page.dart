@@ -5,6 +5,7 @@ import 'package:wwe_bets/style/text_style.dart';
 import 'package:wwe_bets/widgets/create_match_card/ppv_input.dart';
 import 'package:wwe_bets/widgets/create_match_card/title_checkbox.dart';
 import 'package:wwe_bets/widgets/create_match_card/wrestler_input_row.dart';
+import '../widgets/bottom_navigation_bar_widget.dart';
 import '../widgets/common/input_decoration.dart';
 import '../widgets/common/custom_snackbar.dart';
 
@@ -19,11 +20,18 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _typeController = TextEditingController();
+  final TextEditingController _ppvController = TextEditingController(); // Controller per PPV
   final DbService dbService = DbService();
+  bool _isLoading = false;
 
-  String? _selectedPPV;
   bool _showTitleField = false;
   List<String> wrestlers = ['', ''];
+
+  @override
+  void initState() {
+    super.initState();
+    _ppvController.text = '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,21 +41,25 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
         elevation: 0,
         actions: [
           GestureDetector(
-            onTap: _saveMatchCard,
+            onTap: (_isLoading || !_canCreateMatch()) ? null : _saveMatchCard, // Disable if loading or validation fails
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  AutoSizeText(
+                  _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white) // Show loader if loading
+                      : AutoSizeText(
                     "Crea",
-                    style: MemoText.createMatchCardButton,
+                    style: MemoText.createMatchCardButton.copyWith(
+                      color: _canCreateMatch() ? Colors.white : Colors.grey,
+                    ),
                     minFontSize: 16,
                     maxLines: 1,
                   ),
                   const SizedBox(width: 8),
-                  const Icon(
+                  Icon(
                     Icons.arrow_forward,
-                    color: Colors.white,
+                    color: _canCreateMatch() ? Colors.white : Colors.grey,
                   ),
                 ],
               ),
@@ -79,12 +91,7 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                           Text('Nome PPV *', style: MemoText.createInputMainText),
                           const SizedBox(height: 8),
                           PPVInput(
-                            selectedPPV: _selectedPPV,
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedPPV = value;
-                              });
-                            },
+                            ppvController: _ppvController,
                           ),
                           const SizedBox(height: 22),
                           TitleCheckbox(
@@ -163,6 +170,15 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
     );
   }
 
+  bool _canCreateMatch() {
+    if (_ppvController.text.trim().isEmpty ||
+        _typeController.text.trim().isEmpty ||
+        _getValidWrestlers().length < 2 ) {
+      return false;
+    }
+    return true;
+  }
+
   void _addWrestler() {
     setState(() {
       wrestlers.add('');
@@ -174,6 +190,8 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
       setState(() {
         wrestlers.removeAt(index);
       });
+    } else {
+      _showErrorSnackbar('Devi avere almeno due partecipanti.');
     }
   }
 
@@ -191,9 +209,12 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
   }
 
   String _capitalizeFirstLetterOfEachWord(String input) {
+    List<String> minorWords = ['di', 'e', 'con'];
     return input
         .split(' ')
-        .map((word) => word.isEmpty
+        .map((word) => minorWords.contains(word.toLowerCase())
+        ? word
+        : word.isEmpty
         ? ''
         : word[0].toUpperCase() + word.substring(1).toLowerCase())
         .join(' ');
@@ -201,24 +222,31 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
 
   void _saveMatchCard() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
       List<String> validWrestlers = _getValidWrestlers();
-      final payperview = _capitalizeFirstLetterOfEachWord(_selectedPPV ?? '');
+      final payperview = _capitalizeFirstLetterOfEachWord(_ppvController.text);
       final title = _showTitleField ? _capitalizeFirstLetterOfEachWord(_titleController.text) : '';
       final type = _capitalizeFirstLetterOfEachWord(_typeController.text);
 
-      //db
-      await dbService.createMatchCard(payperview, title, type, validWrestlers);
+      try {
+        await dbService.createMatchCard(payperview, title, type, validWrestlers);
+        _showSuccessSnackbar('Match creato con successo!');
 
-      // Clear the form and show success message
-      _formKey.currentState!.reset();
-      setState(() {
-        _titleController.clear();
-        _typeController.clear();
-        _selectedPPV = null;
-        _showTitleField = false;
-        wrestlers = ['', ''];
-      });
-      _showSuccessSnackbar('Match creato con successo!');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const BottomNavigationBarWidget(),
+          ),
+        );
+      } catch (error) {
+        _showErrorSnackbar('Errore durante il salvataggio. Riprova.');
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } else {
       _showErrorSnackbar('Compila tutti i campi obbligatori.');
     }
