@@ -24,31 +24,90 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
     _matchCardsFuture = _fetchMatchCards();
   }
 
-  Future<List<QueryDocumentSnapshot>> _fetchMatchCards() async {
-    final snapshot = await FirebaseFirestore.instance.collection('matchCards').get();
-    return snapshot.docs;
-  }
-
-  Future<void> _deleteAllMatchCards() async {
+  // Add the delete method
+  void _deleteMatchCard(String matchId) async {
     try {
-      final snapshot = await FirebaseFirestore.instance.collection('matchCards').get();
-      final batch = FirebaseFirestore.instance.batch();
-
-      for (var doc in snapshot.docs) {
-        batch.delete(doc.reference);
-      }
-
-      await batch.commit();
-      _showSuccessSnackbar('Tutti i match sono stati eliminati con successo!');
-
-      // Aggiorna il Future dopo aver eliminato tutti i match
+      await dbService.deleteMatchCard(matchId);
+      _showSuccessSnackbar('Match eliminato con successo!');
+      // Reload the match cards after deletion
       setState(() {
         _matchCardsFuture = _fetchMatchCards();
       });
     } catch (e) {
-      _showErrorSnackbar('Errore durante l\'eliminazione dei match!');
+      _showErrorSnackbar('Errore durante l\'eliminazione del match!');
     }
   }
+
+
+  Future<List<QueryDocumentSnapshot>> _fetchMatchCards() async {
+    final snapshot = await FirebaseFirestore.instance.collection('matchCards').get();
+    final matchCards = snapshot.docs;
+
+    // Ordina i match cards
+    matchCards.sort((a, b) {
+      final aUserSelection = isVoteSubmitted[a.id] ?? false;
+      final bUserSelection = isVoteSubmitted[b.id] ?? false;
+      // Metti i match non votati prima di quelli votati
+      return aUserSelection == bUserSelection ? 0 : (aUserSelection ? 1 : -1);
+    });
+
+    return matchCards;
+  }
+
+  void _onSelectionSaved(String matchId, String selectedWrestler) {
+    setState(() {
+      isVoteSubmitted[matchId] = true; // Aggiorna lo stato di voto
+    });
+    _showSuccessSnackbar('Hai votato $selectedWrestler con successo!');
+    // Ricarica i match cards per aggiornare l'ordinamento
+    _matchCardsFuture = _fetchMatchCards();
+  }
+
+
+  Future<void> _deleteAllMatchCards() async {
+    try {
+      // Get all match cards
+      final matchCardsSnapshot = await FirebaseFirestore.instance.collection('matchCards').get();
+      final batch = FirebaseFirestore.instance.batch();
+
+      // Prepare a list to hold user selection deletions
+      final List<Future<void>> userSelectionDeletions = [];
+
+      for (var doc in matchCardsSnapshot.docs) {
+        // Add the deletion of the match card to the batch
+        batch.delete(doc.reference);
+
+        // Assuming user selections are stored in a separate collection named 'userSelections'
+        // Here we construct the query to find user selections based on the matchId
+        final matchId = doc.id; // Assuming the document ID is the matchId
+        userSelectionDeletions.add(
+          FirebaseFirestore.instance
+              .collection('userSelections')
+              .where('matchId', isEqualTo: matchId)
+              .get()
+              .then((userSelectionsSnapshot) {
+            for (var userDoc in userSelectionsSnapshot.docs) {
+              batch.delete(userDoc.reference); // Delete each user selection
+            }
+          }),
+        );
+      }
+
+      // Wait for all user selection deletions to complete before committing the batch
+      await Future.wait(userSelectionDeletions);
+      await batch.commit();
+
+      _showSuccessSnackbar('Tutti i match e le rispettive selezioni degli utenti sono stati eliminati con successo!');
+
+      // Update the Future after deleting all matches
+      setState(() {
+        _matchCardsFuture = _fetchMatchCards();
+      });
+    } catch (e) {
+      _showErrorSnackbar('Errore durante l\'eliminazione dei match e delle selezioni degli utenti!');
+    }
+  }
+
 
   void _showSuccessSnackbar(String message) {
     CustomSnackbar(
@@ -76,41 +135,42 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
           ),
-          title: Row(
+          title: const Row(
             children: [
               Icon(Icons.warning, color: Colors.red, size: 30),
               SizedBox(width: 10),
               Expanded(child: Text('Elimina tutti i match')),
             ],
           ),
-          content: Text(
+          content: const Text(
             'Sei sicuro di voler eliminare tutti i match? Questa azione non può essere annullata.',
             style: TextStyle(fontSize: 16),
           ),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.grey, backgroundColor: Colors.grey[200],
+                foregroundColor: Colors.grey,
+                backgroundColor: Colors.grey[200],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
-              child: Text('Annulla', style: TextStyle(color: ColorsBets.blackHD),),
+              child: const Text('Annulla', style: TextStyle(color: ColorsBets.blackHD)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
-              child: Text('Elimina', style: TextStyle(color: ColorsBets.whiteHD),),
+              child: const Text('Elimina', style: TextStyle(color: ColorsBets.whiteHD)),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _deleteAllMatchCards();
@@ -128,15 +188,28 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Prossimi Match', style: MemoText.createMatchCardButton),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.delete_forever,color: ColorsBets.whiteHD,),
+            icon: const Icon(Icons.delete_forever, color: ColorsBets.whiteHD),
             onPressed: _confirmDeleteAllMatchCards,
           ),
         ],
+        title: FutureBuilder<List<QueryDocumentSnapshot>>(
+          future: _matchCardsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return  Text('Prossimi Match', style: MemoText.createMatchCardButton); // Placeholder text while loading
+            }
+
+            final matchCardsCount = snapshot.data?.length ?? 0; // Get match card count
+            return Text(
+              'Prossimi Match: $matchCardsCount',
+              style: MemoText.createMatchCardButton, // Use the same text style as before
+            );
+          },
+        ),
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
@@ -155,18 +228,19 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
               child: FutureBuilder<List<QueryDocumentSnapshot>>(
                 future: _matchCardsFuture,
                 builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: ColorsBets.whiteHD,
+                      ),
+                    );
+                  }
+
                   if (snapshot.hasError) {
                     return Center(
                       child: Text(
                         'Qualcosa è andato storto!',
                         style: MemoText.noMatches,
-                      ),
-                    );
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: ColorsBets.whiteHD,
                       ),
                     );
                   }
@@ -182,33 +256,45 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
                     );
                   }
 
-                  return ListView.builder(
-                    itemCount: matchCards.length,
-                    itemBuilder: (context, index) {
-                      final matchCard = matchCards[index];
-                      final matchId = matchCard.id;
-                      final payperview = matchCard['payperview'] as String;
-                      final title = matchCard['title'] as String;
-                      final type = matchCard['type'] as String;
-                      final wrestlers = List<String>.from(matchCard['wrestlers']);
+                  return SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: ListView.builder(
+                            itemCount: matchCards.length,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              final matchCard = matchCards[index];
+                              final matchId = matchCard.id;
+                              final payperview = matchCard['payperview'] as String;
+                              final title = matchCard['title'] as String;
+                              final type = matchCard['type'] as String;
+                              final wrestlers = List<String>.from(matchCard['wrestlers']);
 
-                      final selectableWrestlers = List<String>.from(wrestlers)..add('No Contest');
+                              final selectableWrestlers = List<String>.from(wrestlers)..add('No Contest');
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: MatchCardItem(
-                          matchId: matchId,
-                          payperview: payperview,
-                          title: title,
-                          type: type,
-                          wrestlers: wrestlers,
-                          selectableWrestlers: selectableWrestlers,
-                          dbService: dbService,
-                          isVoteSubmitted: isVoteSubmitted,
-                          onSelectionSaved: _onSelectionSaved,
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                child: MatchCardItem(
+                                  matchId: matchId,
+                                  payperview: payperview,
+                                  title: title,
+                                  type: type,
+                                  wrestlers: wrestlers,
+                                  selectableWrestlers: selectableWrestlers,
+                                  dbService: dbService,
+                                  isVoteSubmitted: isVoteSubmitted,
+                                  onSelectionSaved: _onSelectionSaved,
+                                  onDelete: _deleteMatchCard,
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   );
                 },
               ),
@@ -219,10 +305,6 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
     );
   }
 
-  void _onSelectionSaved(String matchId, String selectedWrestler) {
-    setState(() {
-      isVoteSubmitted[matchId] = true;
-    });
-    _showSuccessSnackbar('Hai votato $selectedWrestler con successo!');
-  }
+
+
 }

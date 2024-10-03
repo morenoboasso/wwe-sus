@@ -148,4 +148,24 @@ class DbService {
       return [];
     }
   }
+
+  Future<void> deleteMatchCard(String matchId) async {
+    final batch = FirebaseFirestore.instance.batch();
+
+    // Delete the match card
+    batch.delete(_firestore.collection('matchCards').doc(matchId));
+
+    // Delete associated user selections
+    final userSelectionsSnapshot = await _firestore
+        .collection('userSelections')
+        .where('matchId', isEqualTo: matchId)
+        .get();
+
+    for (var doc in userSelectionsSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
+  }
+
 }

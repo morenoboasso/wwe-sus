@@ -21,9 +21,7 @@ class _RankingPageState extends State<RankingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text('Classifica', style: MemoText.createMatchCardButton),
-        ),
+        title:  Text('Classifica', style: MemoText.createMatchCardButton),
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: kToolbarHeight, // Ensures the toolbar height is standard

@@ -17,6 +17,7 @@ class MatchCardItem extends StatefulWidget {
   final DbService dbService;
   final Map<String, bool> isVoteSubmitted;
   final void Function(String matchId, String selectedWrestler) onSelectionSaved;
+  final Function(String) onDelete; // Add this line for the delete callback
 
   const MatchCardItem({
     required this.matchId,
@@ -28,6 +29,7 @@ class MatchCardItem extends StatefulWidget {
     required this.dbService,
     required this.isVoteSubmitted,
     required this.onSelectionSaved,
+    required this.onDelete, // Add this line for the delete callback
     super.key,
   });
 
@@ -42,6 +44,7 @@ class _MatchCardItemState extends State<MatchCardItem> {
   int? voteCount;
   bool isLoading = true;
   bool hasError = false;
+  bool _isExpanded = false; // Track the expansion state
 
   @override
   void initState() {
@@ -83,80 +86,112 @@ class _MatchCardItemState extends State<MatchCardItem> {
     final isSubmitted = widget.isVoteSubmitted[widget.matchId] ?? false;
     final isMatchCompleted = matchWinner != null;
 
-    return Card(
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.withOpacity(0.7), Colors.lightBlueAccent.withOpacity(0.7)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isExpanded = !_isExpanded; // Toggle expansion state
+        });
+      },
+      child: Card(
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.0),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Center(
-                child: Text(
-                  widget.payperview,
-                  style: MemoText.ppvText,
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue.withOpacity(0.7), Colors.lightBlueAccent.withOpacity(0.7)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Icon(
+                      userSelection != null ? Icons.check_circle : Icons.close,
+                      color: userSelection != null ? Colors.white : Colors.red,
+                    ),
+                    Expanded(
+                      child: Text(
+                        widget.payperview,
+                        style: MemoText.ppvText,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Icon(
+                      _isExpanded ? Icons.expand_less : Icons.expand_more,
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 20.0),
-              MatchInfoRow(
-                title: widget.title,
-                type: widget.type,
-              ),
-              const SizedBox(height: 20.0),
-              WrestlerList(wrestlers: widget.wrestlers),
-              const SizedBox(height: 20.0),
-              VoteSection(
-                isMatchCompleted: isMatchCompleted,
-                matchWinner: matchWinner,
-                userSelection: userSelection,
-                isSubmitted: isSubmitted,
-                selectableWrestlers: widget.selectableWrestlers,
-                selectedWrestler: _selectedWrestler,
-                onSelectionChanged: (String? newValue) {
-                  setState(() {
-                    _selectedWrestler = newValue;
-                  });
-                },
-                onVoteConfirmed: () async {
-                  if (_selectedWrestler != null && widget.selectableWrestlers.contains(_selectedWrestler)) {
-                    try {
-                      await widget.dbService.saveUserSelection(widget.matchId, _selectedWrestler!);
-                      widget.onSelectionSaved(widget.matchId, _selectedWrestler!);
-                      await _fetchData();
-                    } catch (e) {
-                      debugPrint('Error saving selection: $e');
-                      CustomSnackbar(
-                        color: Colors.red,
-                        context: context,
-                        message: 'Errore nel salvataggio della selezione.',
-                        icon: Icons.report_gmailerrorred,
-                      ).show();
-                    }
-                  } else {
-                    CustomSnackbar(
-                      color: Colors.red,
-                      context: context,
-                      message: 'Attenzione! Scegli almeno un vincitore.',
-                      icon: Icons.report_gmailerrorred,
-                    ).show();
-                  }
-                },
-                onShowWinnerSelectionDialog: () => _showWinnerSelectionDialog(),
-              ),
-            ],
+                const SizedBox(height: 20.0),
+                if (_isExpanded) ...[
+                  MatchInfoRow(
+                    title: widget.title,
+                    type: widget.type,
+                  ),
+                  const SizedBox(height: 20.0),
+                ],
+                WrestlerList(wrestlers: widget.wrestlers),
+                if (_isExpanded) ...[
+                  const SizedBox(height: 20.0),
+                  VoteSection(
+                    isMatchCompleted: isMatchCompleted,
+                    matchWinner: matchWinner,
+                    userSelection: userSelection,
+                    isSubmitted: isSubmitted,
+                    selectableWrestlers: widget.selectableWrestlers,
+                    selectedWrestler: _selectedWrestler,
+                    onSelectionChanged: (String? newValue) {
+                      setState(() {
+                        _selectedWrestler = newValue;
+                      });
+                    },
+                    onVoteConfirmed: () async {
+                      if (_selectedWrestler != null && widget.selectableWrestlers.contains(_selectedWrestler)) {
+                        try {
+                          await widget.dbService.saveUserSelection(widget.matchId, _selectedWrestler!);
+                          widget.onSelectionSaved(widget.matchId, _selectedWrestler!);
+                          await _fetchData();
+                        } catch (e) {
+                          debugPrint('Error saving selection: $e');
+                          CustomSnackbar(
+                            color: Colors.red,
+                            context: context,
+                            message: 'Errore nel salvataggio della selezione.',
+                            icon: Icons.report_gmailerrorred,
+                          ).show();
+                        }
+                      } else {
+                        CustomSnackbar(
+                          color: Colors.red,
+                          context: context,
+                          message: 'Attenzione! Scegli almeno un vincitore.',
+                          icon: Icons.report_gmailerrorred,
+                        ).show();
+                      }
+                    },
+                    onShowWinnerSelectionDialog: () => _showWinnerSelectionDialog(),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      // Show confirmation dialog before deletion
+                      _showDeleteConfirmationDialog();
+                    },
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),
@@ -174,6 +209,62 @@ class _MatchCardItemState extends State<MatchCardItem> {
           onSelectionSaved: (matchId, winner) async {
             await _fetchData();
           },
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.warning, color: Colors.red, size: 30),
+              SizedBox(width: 10),
+              Expanded(child: Text('Elimina il match')),
+            ],
+          ),
+          content: const Text(
+            'Sei sicuro di voler eliminare questo match? Questa azione non può essere annullata.',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey,
+                backgroundColor: Colors.grey[200],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: const Text('Annulla'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            const SizedBox(width: 10),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: const Text('Elimina', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Call the onDelete callback when pressed
+                widget.onDelete(widget.matchId); // Using the matchId from the widget
+              },
+            ),
+          ],
         );
       },
     );
