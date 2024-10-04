@@ -1,10 +1,53 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+class NotificationService {
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+
+  Future<void> init() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initializationSettings =
+    InitializationSettings(android: initializationSettingsAndroid);
+
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> showNotification(String title, String body) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+      'your_channel_id',
+      'your_channel_name',
+      channelDescription: 'your_channel_description',
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: true,
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+    NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await _flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+    );
+  }
+}
 
 class DbService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GetStorage _storage = GetStorage();
+  final NotificationService _notificationService = NotificationService();
+
+  DbService() {
+    _notificationService.init(); // Inizializza il servizio di notifiche
+  }
 
   Future<String?> getUserName() async {
     return _storage.read('userName');
@@ -99,7 +142,7 @@ class DbService {
     try {
       await _firestore.collection('matchCards').doc(matchId).update({
         'winner': winner,
-        'status': 'completed', // Example field to mark match as completed
+        'status': 'completed',
       });
     } catch (e) {
       debugPrint('Error updating match result: $e');
@@ -114,15 +157,36 @@ class DbService {
         final querySnapshot = await _firestore
             .collection('userSelections')
             .where('matchId', isEqualTo: matchId)
-            .where('selectedWrestler', isEqualTo: winner)
             .get();
 
-        final usersWhoWon = querySnapshot.docs.map((doc) => doc['userName']).toSet();
+        // Get users who selected the winner
+        final usersWhoWon = querySnapshot.docs
+            .where((doc) => doc['selectedWrestler'] == winner)
+            .map((doc) => doc['userName'])
+            .toSet();
 
+        // Update scores for users who won and notify them
         for (final user in usersWhoWon) {
           await _firestore.collection('users').doc(user).update({
             'points': FieldValue.increment(1),
           });
+
+          // Notify for the victory
+          await _notificationService.showNotification(
+            'Hai vinto!',
+            'Grande, Hai guadagnato un punto!',
+          );
+        }
+
+        // Notify users who lost
+        for (final doc in querySnapshot.docs) {
+          final participantUserName = doc['userName'];
+          if (!usersWhoWon.contains(participantUserName)) {
+            await _notificationService.showNotification(
+              'Hai perso!',
+              'Mispiace, non hai indovinato!',
+            );
+          }
         }
       } catch (e) {
         debugPrint('Error updating user score: $e');
@@ -131,6 +195,7 @@ class DbService {
       debugPrint('No user name found in storage.');
     }
   }
+  
   Future<List<Map<String, dynamic>>> getUserRanking() async {
     try {
       final querySnapshot = await _firestore
@@ -152,10 +217,8 @@ class DbService {
   Future<void> deleteMatchCard(String matchId) async {
     final batch = FirebaseFirestore.instance.batch();
 
-    // Delete the match card
     batch.delete(_firestore.collection('matchCards').doc(matchId));
 
-    // Delete associated user selections
     final userSelectionsSnapshot = await _firestore
         .collection('userSelections')
         .where('matchId', isEqualTo: matchId)
@@ -167,5 +230,4 @@ class DbService {
 
     await batch.commit();
   }
-
 }
