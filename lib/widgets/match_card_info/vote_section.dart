@@ -84,6 +84,7 @@ class VoteSection extends StatelessWidget {
                 onChanged: isSubmitted ? null : onSelectionChanged,
                 hint: Text('Seleziona il vincitore', style: MemoText.thirdRowMatchInfo),
               ),
+              const Divider(color: Colors.black26, thickness: 2),
               const SizedBox(height: 12.0),
               ElevatedButton(
                 onPressed: isSubmitted ? null : onVoteConfirmed,
@@ -108,6 +109,9 @@ class VoteSection extends StatelessWidget {
             children: [
               Text('Hai votato:', style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white)),
               Text(userSelection ?? '', style: const TextStyle(color: Colors.white)),
+              const SizedBox(height: 15),
+              const Divider(color: Colors.black26, thickness: 2),
+
               const SizedBox(height: 12.0),
               ElevatedButton(
                 onPressed: onShowWinnerSelectionDialog,
@@ -123,7 +127,9 @@ class VoteSection extends StatelessWidget {
                   'Seleziona Vincitore',
                   style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                 ),
+
               ),
+
             ],
           ),
       ],

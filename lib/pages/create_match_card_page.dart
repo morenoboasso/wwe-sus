@@ -85,7 +85,6 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                       key: _formKey,
                       child: ListView(
                         children: <Widget>[
-                          const SizedBox(height: 22),
                           TitleCheckbox(
                             isChecked: _showTitleField,
                             onChanged: (value) {

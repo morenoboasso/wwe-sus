@@ -195,7 +195,4 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
       ),
     );
   }
-
-
-
 }

@@ -15,7 +15,7 @@ class MatchCardItem extends StatefulWidget {
   final DbService dbService;
   final Map<String, bool> isVoteSubmitted;
   final void Function(String matchId, String selectedWrestler) onSelectionSaved;
-  final Function(String) onDelete; // Add this line for the delete callback
+  final Function(String) onDelete; 
 
   const MatchCardItem({
     required this.matchId,
@@ -26,7 +26,7 @@ class MatchCardItem extends StatefulWidget {
     required this.dbService,
     required this.isVoteSubmitted,
     required this.onSelectionSaved,
-    required this.onDelete, // Add this line for the delete callback
+    required this.onDelete, 
     super.key,
   });
 
@@ -41,7 +41,7 @@ class _MatchCardItemState extends State<MatchCardItem> {
   int? voteCount;
   bool isLoading = true;
   bool hasError = false;
-  bool _isExpanded = false; // Track the expansion state
+  bool _isExpanded = false; 
 
   @override
   void initState() {
@@ -86,7 +86,7 @@ class _MatchCardItemState extends State<MatchCardItem> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _isExpanded = !_isExpanded; // Toggle expansion state
+          _isExpanded = !_isExpanded; 
         });
       },
       child: Card(
@@ -97,8 +97,14 @@ class _MatchCardItemState extends State<MatchCardItem> {
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: userSelection != null
+                ? LinearGradient(
               colors: [Colors.blue.withOpacity(0.7), Colors.lightBlueAccent.withOpacity(0.7)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
+                : LinearGradient(
+              colors: [Colors.black.withOpacity(0.6), Colors.black.withOpacity(0.3)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -113,9 +119,20 @@ class _MatchCardItemState extends State<MatchCardItem> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(
-                      userSelection != null ? Icons.check_circle : Icons.close,
-                      color: userSelection != null ? Colors.white : Colors.red,
+                    userSelection == null
+                        ? Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.red,
+                      ),
+                    )
+                        : const Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
                     ),
                     Icon(
                       _isExpanded ? Icons.expand_less : Icons.expand_more,
@@ -171,12 +188,12 @@ class _MatchCardItemState extends State<MatchCardItem> {
                     },
                     onShowWinnerSelectionDialog: () => _showWinnerSelectionDialog(),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                  TextButton.icon(
+                    icon: const Icon(Icons.delete, color: Colors.black,size: 16),
                     onPressed: () {
-                      // Show confirmation dialog before deletion
                       _showDeleteConfirmationDialog();
                     },
+                    label: const Text("Elimina Match",style: TextStyle(color: Colors.black,decoration: TextDecoration.underline,decorationColor: Colors.black ),),
                   ),
                 ],
               ],
