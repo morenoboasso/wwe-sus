@@ -268,7 +268,6 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
                             itemBuilder: (context, index) {
                               final matchCard = matchCards[index];
                               final matchId = matchCard.id;
-                              final payperview = matchCard['payperview'] as String;
                               final title = matchCard['title'] as String;
                               final type = matchCard['type'] as String;
                               final wrestlers = List<String>.from(matchCard['wrestlers']);
@@ -279,7 +278,6 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
                                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                                 child: MatchCardItem(
                                   matchId: matchId,
-                                  payperview: payperview,
                                   title: title,
                                   type: type,
                                   wrestlers: wrestlers,

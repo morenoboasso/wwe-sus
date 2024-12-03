@@ -14,11 +14,6 @@ void main() async {
   );
   await GetStorage.init();
 
-  // Richiesta del permesso di inviare notifiche
-  await Permission.notification.request();
-
-  await NotificationService().init();
-
   final box = GetStorage();
   final userName = box.read('userName');
 

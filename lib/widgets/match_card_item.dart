@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:wwe_bets/services/db_service.dart';
 import 'package:wwe_bets/widgets/common/custom_snackbar.dart';
 import 'package:wwe_bets/widgets/match_card_info/winner_selection_dialog.dart';
-import '../style/text_style.dart';
 import 'match_card_info/match_info_row.dart';
 import 'match_card_info/vote_section.dart';
 import 'match_card_info/wrestler_list.dart';
 
 class MatchCardItem extends StatefulWidget {
   final String matchId;
-  final String payperview;
   final String title;
   final String type;
   final List<String> wrestlers;
@@ -21,7 +19,6 @@ class MatchCardItem extends StatefulWidget {
 
   const MatchCardItem({
     required this.matchId,
-    required this.payperview,
     required this.title,
     required this.type,
     required this.wrestlers,
@@ -120,20 +117,12 @@ class _MatchCardItemState extends State<MatchCardItem> {
                       userSelection != null ? Icons.check_circle : Icons.close,
                       color: userSelection != null ? Colors.white : Colors.red,
                     ),
-                    Expanded(
-                      child: Text(
-                        widget.payperview,
-                        style: MemoText.ppvText,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
                     Icon(
                       _isExpanded ? Icons.expand_less : Icons.expand_more,
                       color: Colors.white,
                     ),
                   ],
                 ),
-                const SizedBox(height: 20.0),
                 if (_isExpanded) ...[
                   MatchInfoRow(
                     title: widget.title,

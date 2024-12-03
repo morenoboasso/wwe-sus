@@ -68,10 +68,9 @@ class DbService {
     }
   }
 
-  Future<void> createMatchCard(String payperview, String title, String type, List<String> wrestlers) async {
+  Future<void> createMatchCard(String title, String type, List<String> wrestlers) async {
     try {
       await _firestore.collection('matchCards').add({
-        'payperview': payperview,
         'title': title,
         'type': type,
         'wrestlers': wrestlers,

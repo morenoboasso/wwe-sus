@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:wwe_bets/services/db_service.dart';
 import 'package:wwe_bets/style/text_style.dart';
-import 'package:wwe_bets/widgets/create_match_card/ppv_input.dart';
 import 'package:wwe_bets/widgets/create_match_card/title_checkbox.dart';
 import 'package:wwe_bets/widgets/create_match_card/wrestler_input_row.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
@@ -20,7 +19,6 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _typeController = TextEditingController();
-  final TextEditingController _ppvController = TextEditingController(); // Controller per PPV
   final DbService dbService = DbService();
   bool _isLoading = false;
 
@@ -30,7 +28,6 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
   @override
   void initState() {
     super.initState();
-    _ppvController.text = '';
   }
 
   @override
@@ -88,11 +85,6 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                       key: _formKey,
                       child: ListView(
                         children: <Widget>[
-                          Text('Nome PPV *', style: MemoText.createInputMainText),
-                          const SizedBox(height: 8),
-                          PPVInput(
-                            ppvController: _ppvController,
-                          ),
                           const SizedBox(height: 22),
                           TitleCheckbox(
                             isChecked: _showTitleField,
@@ -171,8 +163,7 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
   }
 
   bool _canCreateMatch() {
-    if (_ppvController.text.trim().isEmpty ||
-        _typeController.text.trim().isEmpty ||
+    if (_typeController.text.trim().isEmpty ||
         _getValidWrestlers().length < 2 ) {
       return false;
     }
@@ -227,12 +218,10 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
       });
 
       List<String> validWrestlers = _getValidWrestlers();
-      final payperview = _capitalizeFirstLetterOfEachWord(_ppvController.text);
-      final title = _showTitleField ? _capitalizeFirstLetterOfEachWord(_titleController.text) : '';
       final type = _capitalizeFirstLetterOfEachWord(_typeController.text);
-
+      final title = _capitalizeFirstLetterOfEachWord(_titleController.text);
       try {
-        await dbService.createMatchCard(payperview, title, type, validWrestlers);
+        await dbService.createMatchCard(title, type, validWrestlers);
         _showSuccessSnackbar('Match creato con successo!');
 
         Navigator.of(context).pushReplacement(
