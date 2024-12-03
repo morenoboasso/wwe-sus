@@ -16,7 +16,7 @@ class MemoText {
       fontWeight: FontWeight.w200,
       fontSize: 14);
   static TextStyle get createMatchCardButton => const TextStyle(
-      color: ColorsBets.whiteHD, fontWeight: FontWeight.bold, fontSize: 22);
+      color: ColorsBets.whiteHD, fontWeight: FontWeight.bold, fontSize: 28);
   static TextStyle get addWrestlerButton =>
       const TextStyle(color: ColorsBets.whiteHD, fontSize: 12);
 

@@ -63,52 +63,6 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
     _matchCardsFuture = _fetchMatchCards();
   }
 
-
-  Future<void> _deleteAllMatchCards() async {
-    try {
-      // Get all match cards
-      final matchCardsSnapshot = await FirebaseFirestore.instance.collection('matchCards').get();
-      final batch = FirebaseFirestore.instance.batch();
-
-      // Prepare a list to hold user selection deletions
-      final List<Future<void>> userSelectionDeletions = [];
-
-      for (var doc in matchCardsSnapshot.docs) {
-        // Add the deletion of the match card to the batch
-        batch.delete(doc.reference);
-
-        // Assuming user selections are stored in a separate collection named 'userSelections'
-        // Here we construct the query to find user selections based on the matchId
-        final matchId = doc.id; // Assuming the document ID is the matchId
-        userSelectionDeletions.add(
-          FirebaseFirestore.instance
-              .collection('userSelections')
-              .where('matchId', isEqualTo: matchId)
-              .get()
-              .then((userSelectionsSnapshot) {
-            for (var userDoc in userSelectionsSnapshot.docs) {
-              batch.delete(userDoc.reference); // Delete each user selection
-            }
-          }),
-        );
-      }
-
-      // Wait for all user selection deletions to complete before committing the batch
-      await Future.wait(userSelectionDeletions);
-      await batch.commit();
-
-      _showSuccessSnackbar('Tutti i match e le rispettive selezioni degli utenti sono stati eliminati con successo!');
-
-      // Update the Future after deleting all matches
-      setState(() {
-        _matchCardsFuture = _fetchMatchCards();
-      });
-    } catch (e) {
-      _showErrorSnackbar('Errore durante l\'eliminazione dei match e delle selezioni degli utenti!');
-    }
-  }
-
-
   void _showSuccessSnackbar(String message) {
     CustomSnackbar(
       color: Colors.green,
@@ -127,61 +81,6 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
     ).show();
   }
 
-  void _confirmDeleteAllMatchCards() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.warning, color: Colors.red, size: 30),
-              SizedBox(width: 10),
-              Expanded(child: Text('Elimina tutti i match')),
-            ],
-          ),
-          content: const Text(
-            'Sei sicuro di voler eliminare tutti i match? Questa azione non può essere annullata.',
-            style: TextStyle(fontSize: 16),
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.grey,
-                backgroundColor: Colors.grey[200],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              ),
-              child: const Text('Annulla', style: TextStyle(color: ColorsBets.blackHD)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            const SizedBox(width: 10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              ),
-              child: const Text('Elimina', style: TextStyle(color: ColorsBets.whiteHD)),
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _deleteAllMatchCards();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final double horizontalPadding = MediaQuery.of(context).size.width * 0.04;
@@ -190,23 +89,17 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_forever, color: ColorsBets.whiteHD),
-            onPressed: _confirmDeleteAllMatchCards,
-          ),
-        ],
         title: FutureBuilder<List<QueryDocumentSnapshot>>(
           future: _matchCardsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return  Text('Prossimi Match', style: MemoText.createMatchCardButton); // Placeholder text while loading
+              return  Text('Match attivi', style: MemoText.createMatchCardButton);
             }
 
-            final matchCardsCount = snapshot.data?.length ?? 0; // Get match card count
+            final matchCardsCount = snapshot.data?.length ?? 0;
             return Text(
-              'Prossimi Match: $matchCardsCount',
-              style: MemoText.createMatchCardButton, // Use the same text style as before
+              'Match attivi: $matchCardsCount',
+              style: MemoText.createMatchCardButton,
             );
           },
         ),
