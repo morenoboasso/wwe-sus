@@ -16,51 +16,77 @@ class MatchCardListPage extends StatefulWidget {
 class _MatchCardListPageState extends State<MatchCardListPage> {
   final DbService dbService = DbService();
   Map<String, bool> isVoteSubmitted = {};
-  late Future<List<QueryDocumentSnapshot>> _matchCardsFuture;
+  late Future<List<Map<String, dynamic>>> _matchCardsFuture;
+
+  List<Map<String, dynamic>> nonVotati = [];
+  List<Map<String, dynamic>> votatiNonConclusi = [];
+  List<Map<String, dynamic>> completati = [];
 
   @override
   void initState() {
     super.initState();
-    _matchCardsFuture = _fetchMatchCards();
+    _matchCardsFuture = _fetchMatchCardsWithDetails();
   }
 
-  // Add the delete method
+  Future<List<Map<String, dynamic>>> _fetchMatchCardsWithDetails() async {
+    final snapshot = await FirebaseFirestore.instance.collection('matchCards').get();
+
+    List<Map<String, dynamic>> matchCards = [];
+    for (var doc in snapshot.docs) {
+      final matchId = doc.id;
+      final title = doc['title'] as String;
+      final type = doc['type'] as String;
+      final wrestlers = List<String>.from(doc['wrestlers']);
+
+      // Recupero info extra per filtraggio
+      final userSelection = await dbService.getUserSelection(matchId);
+      final matchWinner = await dbService.getMatchWinner(matchId);
+
+      matchCards.add({
+        'matchId': matchId,
+        'title': title,
+        'type': type,
+        'wrestlers': wrestlers,
+        'selectableWrestlers': [...wrestlers, 'No Contest'],
+        'userSelection': userSelection,
+        'matchWinner': matchWinner,
+      });
+    }
+
+    // Filtra qui i match per tab
+    nonVotati = matchCards.where((m) =>
+    m['userSelection'] == null && m['matchWinner'] == null
+    ).toList();
+
+    votatiNonConclusi = matchCards.where((m) =>
+    m['userSelection'] != null && m['matchWinner'] == null
+    ).toList();
+
+    completati = matchCards.where((m) =>
+    m['matchWinner'] != null
+    ).toList();
+
+    return matchCards;
+  }
+
   void _deleteMatchCard(String matchId) async {
     try {
       await dbService.deleteMatchCard(matchId);
       _showSuccessSnackbar('Match eliminato con successo!');
-      // Reload the match cards after deletion
       setState(() {
-        _matchCardsFuture = _fetchMatchCards();
+        _matchCardsFuture = _fetchMatchCardsWithDetails();
       });
     } catch (e) {
       _showErrorSnackbar('Errore durante l\'eliminazione del match!');
     }
   }
 
-
-  Future<List<QueryDocumentSnapshot>> _fetchMatchCards() async {
-    final snapshot = await FirebaseFirestore.instance.collection('matchCards').get();
-    final matchCards = snapshot.docs;
-
-    // Ordina i match cards
-    matchCards.sort((a, b) {
-      final aUserSelection = isVoteSubmitted[a.id] ?? false;
-      final bUserSelection = isVoteSubmitted[b.id] ?? false;
-      // Metti i match non votati prima di quelli votati
-      return aUserSelection == bUserSelection ? 0 : (aUserSelection ? 1 : -1);
-    });
-
-    return matchCards;
-  }
-
   void _onSelectionSaved(String matchId, String selectedWrestler) {
     setState(() {
-      isVoteSubmitted[matchId] = true; // Aggiorna lo stato di voto
+      isVoteSubmitted[matchId] = true;
+      _matchCardsFuture = _fetchMatchCardsWithDetails();
     });
     _showSuccessSnackbar('Hai votato $selectedWrestler con successo!');
-    // Ricarica i match cards per aggiornare l'ordinamento
-    _matchCardsFuture = _fetchMatchCards();
   }
 
   void _showSuccessSnackbar(String message) {
@@ -81,44 +107,56 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
     ).show();
   }
 
+  Widget _buildTabWithBadge(String title, int count) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Tab(text: title),
+        if (count > 0)
+          Positioned(
+            right: -18,
+            top: 2,
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                count.toString(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double horizontalPadding = MediaQuery.of(context).size.width * 0.04;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: FutureBuilder<List<QueryDocumentSnapshot>>(
-          future: _matchCardsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return  Text('Match attivi', style: MemoText.createMatchCardButton);
-            }
-
-            final matchCardsCount = snapshot.data?.length ?? 0;
-            return Text(
-              'Match attivi: $matchCardsCount',
-              style: MemoText.createMatchCardButton,
-            );
-          },
-        ),
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/bg.jpeg'),
-                fit: BoxFit.cover,
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        body: Stack(
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/bg.jpeg'),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: FutureBuilder<List<QueryDocumentSnapshot>>(
+            SafeArea(
+              child: FutureBuilder<List<Map<String, dynamic>>>(
                 future: _matchCardsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -138,60 +176,72 @@ class _MatchCardListPageState extends State<MatchCardListPage> {
                     );
                   }
 
-                  final matchCards = snapshot.data ?? [];
-
-                  if (matchCards.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'Nessun Match disponibile, creane uno!',
-                        style: MemoText.noMatches,
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                        child: TabBar(
+                          indicatorColor: Colors.white,
+                          labelColor: Colors.white,
+                          unselectedLabelColor: Colors.grey,
+                          tabs: [
+                            _buildTabWithBadge('Nuovi', nonVotati.length),
+                            _buildTabWithBadge('Votati', votatiNonConclusi.length),
+                            _buildTabWithBadge('Completati', completati.length),
+                          ],
+                        ),
                       ),
-                    );
-                  }
-
-                  return SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: ListView.builder(
-                            itemCount: matchCards.length,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              final matchCard = matchCards[index];
-                              final matchId = matchCard.id;
-                              final title = matchCard['title'] as String;
-                              final type = matchCard['type'] as String;
-                              final wrestlers = List<String>.from(matchCard['wrestlers']);
-
-                              final selectableWrestlers = List<String>.from(wrestlers)..add('No Contest');
-
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                child: MatchCardItem(
-                                  matchId: matchId,
-                                  title: title,
-                                  type: type,
-                                  wrestlers: wrestlers,
-                                  selectableWrestlers: selectableWrestlers,
-                                  dbService: dbService,
-                                  isVoteSubmitted: isVoteSubmitted,
-                                  onSelectionSaved: _onSelectionSaved,
-                                  onDelete: _deleteMatchCard,
-                                ),
-                              );
-                            },
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                          child: TabBarView(
+                            children: [
+                              _buildMatchList(nonVotati),
+                              _buildMatchList(votatiNonConclusi),
+                              _buildMatchList(completati),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   );
                 },
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMatchList(List<Map<String, dynamic>> matches) {
+    if (matches.isEmpty) {
+      return Center(
+        child: Text(
+          'Nessun Match disponibile',
+          style: MemoText.noMatches,
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        children: matches.map((match) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: MatchCardItem(
+              matchId: match['matchId'],
+              title: match['title'],
+              type: match['type'],
+              wrestlers: match['wrestlers'],
+              selectableWrestlers: match['selectableWrestlers'],
+              dbService: dbService,
+              isVoteSubmitted: isVoteSubmitted,
+              onSelectionSaved: _onSelectionSaved,
+              onDelete: _deleteMatchCard,
+            ),
+          );
+        }).toList(),
       ),
     );
   }

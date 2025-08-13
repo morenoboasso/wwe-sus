@@ -97,17 +97,32 @@ class _MatchCardItemState extends State<MatchCardItem> {
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Container(
           decoration: BoxDecoration(
-            gradient: userSelection != null
+            gradient: isMatchCompleted
                 ? LinearGradient(
-              colors: [Colors.blue.withOpacity(0.7), Colors.lightBlueAccent.withOpacity(0.7)],
+              colors: [
+                Colors.amberAccent.shade700,
+                Colors.amberAccent.shade200,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
+                : (userSelection != null
+                ? LinearGradient(
+              colors: [
+                Colors.blue.withOpacity(0.7),
+                Colors.lightBlueAccent.withOpacity(0.7)
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             )
                 : LinearGradient(
-              colors: [Colors.black.withOpacity(0.6), Colors.black.withOpacity(0.3)],
+              colors: [
+                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.3)
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-            ),
+            )),
             borderRadius: BorderRadius.circular(15.0),
           ),
           child: Padding(
@@ -119,27 +134,37 @@ class _MatchCardItemState extends State<MatchCardItem> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    userSelection == null
-                        ? Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
+                    if (isMatchCompleted)
+                      Icon(
+                        userSelection == matchWinner
+                            ? Icons.emoji_events // Vittoria
+                            : Icons.sentiment_dissatisfied, // Sconfitta
+                        color: userSelection == matchWinner ? Colors.yellow : Colors.red,
+                        size: 28,
+                      )
+                    else
+                      (userSelection == null
+                          ? Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.red,
+                        ),
+                      )
+                          : const Icon(
+                        Icons.check_circle,
                         color: Colors.white,
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.red,
-                      ),
-                    )
-                        : const Icon(
-                      Icons.check_circle,
-                      color: Colors.white,
-                    ),
+                      )),
                     Icon(
                       _isExpanded ? Icons.expand_less : Icons.expand_more,
                       color: Colors.white,
                     ),
                   ],
                 ),
+
                 if (_isExpanded) ...[
                   MatchInfoRow(
                     title: widget.title,

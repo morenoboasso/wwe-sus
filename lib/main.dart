@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:wwe_bets/routes/routes.dart';
-import 'package:wwe_bets/services/db_service.dart';
 import 'firebase_options.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +12,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await GetStorage.init();
+
+  final player = AudioPlayer();
+  await player.play(AssetSource('sound.mp3'));
 
   final box = GetStorage();
   final userName = box.read('userName');

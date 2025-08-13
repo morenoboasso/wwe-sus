@@ -117,9 +117,6 @@ class _CreateMatchCardPageState extends State<CreateMatchCardPage> {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Inserisci tipo di match.';
                               }
-                              if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
-                                return 'Il tipo di match può contenere solo lettere e spazi.';
-                              }
                               return null;
                             },
                           ),
