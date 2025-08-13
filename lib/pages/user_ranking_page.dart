@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../services/db_service.dart';
 import '../style/text_style.dart';
 
 class RankingPage extends StatefulWidget {
+  const RankingPage({super.key});
+
   @override
   _RankingPageState createState() => _RankingPageState();
 }
@@ -21,10 +24,24 @@ class _RankingPageState extends State<RankingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text('Classifica', style: MemoText.createMatchCardButton),
+        title: Text('Classifica', style: MemoText.createMatchCardButton),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        toolbarHeight: kToolbarHeight, // Ensures the toolbar height is standard
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              if (value == 'reset') {
+                await _resetRanking();
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'reset',
+                child: Text('Reset classifica'),
+              ),
+            ],
+          ),
+        ],
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
@@ -156,5 +173,24 @@ class _RankingPageState extends State<RankingPage> {
         ],
       ),
     );
+  }
+  Future<void> _resetRanking() async {
+    try {
+      final usersSnapshot = await FirebaseFirestore.instance.collection('users').get();
+      for (var doc in usersSnapshot.docs) {
+        await doc.reference.update({'points': 0});
+      }
+      setState(() {
+        _rankingFuture = DbService().getUserRanking();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Classifica resettata!')),
+      );
+    } catch (e) {
+      debugPrint('Errore nel reset della classifica: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Errore nel reset della classifica')),
+      );
+    }
   }
 }
