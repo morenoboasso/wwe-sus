@@ -1,53 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-class NotificationService {
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
-
-  Future<void> init() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    const InitializationSettings initializationSettings =
-    InitializationSettings(android: initializationSettingsAndroid);
-
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  Future<void> showNotification(String title, String body) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-      'your_channel_id',
-      'your_channel_name',
-      channelDescription: 'your_channel_description',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-    );
-
-    const NotificationDetails platformChannelSpecifics =
-    NotificationDetails(android: androidPlatformChannelSpecifics);
-
-    await _flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      body,
-      platformChannelSpecifics,
-    );
-  }
-}
 
 class DbService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GetStorage _storage = GetStorage();
-  final NotificationService _notificationService = NotificationService();
-
-  DbService() {
-    _notificationService.init(); // Inizializza il servizio di notifiche
-  }
 
   Future<String?> getUserName() async {
     return _storage.read('userName');
@@ -70,16 +27,36 @@ class DbService {
 
   Future<void> createMatchCard(String title, String type, List<String> wrestlers) async {
     try {
-      await _firestore.collection('matchCards').add({
+      final matchDoc = await _firestore.collection('matchCards').add({
         'title': title,
         'type': type,
         'wrestlers': wrestlers,
         'createdAt': FieldValue.serverTimestamp(),
       });
+
+      final aiUserQuery = await _firestore
+          .collection('users')
+          .where('name', isEqualTo: 'AI')
+          .limit(1)
+          .get();
+
+      if (aiUserQuery.docs.isNotEmpty && wrestlers.isNotEmpty) {
+        final randomWrestler = (wrestlers..shuffle()).first;
+
+        await _firestore.collection('userSelections').add({
+          'userName': 'AI',
+          'matchId': matchDoc.id,
+          'selectedWrestler': randomWrestler,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        debugPrint('AI ha votato per: $randomWrestler');
+      }
     } catch (e) {
       debugPrint('Error creating match card: $e');
     }
   }
+
 
   Future<void> saveUserSelection(String matchId, String selectedWrestler) async {
     final userName = _storage.read('userName');
@@ -169,23 +146,6 @@ class DbService {
           await _firestore.collection('users').doc(user).update({
             'points': FieldValue.increment(1),
           });
-
-          // Notify for the victory
-          await _notificationService.showNotification(
-            'Hai vinto!',
-            'Grande, Hai guadagnato un punto!',
-          );
-        }
-
-        // Notify users who lost
-        for (final doc in querySnapshot.docs) {
-          final participantUserName = doc['userName'];
-          if (!usersWhoWon.contains(participantUserName)) {
-            await _notificationService.showNotification(
-              'Hai perso!',
-              'Mispiace, non hai indovinato!',
-            );
-          }
         }
       } catch (e) {
         debugPrint('Error updating user score: $e');

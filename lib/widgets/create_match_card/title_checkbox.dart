@@ -26,7 +26,7 @@ class TitleCheckbox extends StatelessWidget {
           value: isChecked,
           onChanged: onChanged,
           checkColor: Colors.black,
-          fillColor: WidgetStateProperty.all(Colors.white),
+          fillColor: MaterialStateProperty.all(Colors.white),
         ),
       ],
     );
