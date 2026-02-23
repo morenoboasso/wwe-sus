@@ -10,9 +10,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  // Initialize Firebase safely (avoid duplicate-app on hot restart)
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } else {
+      Firebase.app();
+    }
+  } on FirebaseException catch (e) {
+    if (e.code == 'duplicate-app') {
+      Firebase.app();
+    } else {
+      rethrow;
+    }
+  }
+
   final authService = FirebaseAuthService();
   await authService.ensureSignedIn();
   await GetStorage.init();

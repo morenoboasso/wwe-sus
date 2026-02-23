@@ -141,3 +141,5 @@ Concetti chiave da applicare nelle rules:
 - Per `votes/{matchId}/userVotes/{userId}`:
   - `userId` deve essere `request.auth.uid`
   - non si può votare se il match è `closed` (controllando via `get(/databases/(default)/documents/matches/{matchId})`).
+
+**Stato:** completato – creato file `firestore.rules` con regole complete per users, matches, votes. Include helper functions `isAdmin()` e `isMatchOpen()`, controllo accessi granulare, e permessi di lettura/scrittura basati su ruoli. Pronto per deploy.
