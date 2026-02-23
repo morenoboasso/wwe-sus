@@ -30,8 +30,8 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
     return Scaffold(
       extendBody: true,
       body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 10.0, left: 45, right: 45, top: 5),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.only(bottom: 10.0, left: 45, right: 45, top: 5),
         child: Container(
           decoration: BoxDecoration(
             color: ColorsBets.whiteHD,
@@ -52,7 +52,7 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
               ],
               currentIndex: _selectedIndex,
               selectedItemColor: ColorsBets.blackHD,
-              unselectedItemColor: ColorsBets.blackHD.withOpacity(0.4),
+              unselectedItemColor: ColorsBets.blackHD.withValues(alpha: 0.4),
               showSelectedLabels: true,
               showUnselectedLabels: false,
               onTap: _onItemTapped,

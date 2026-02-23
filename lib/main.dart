@@ -3,14 +3,17 @@ import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:wwe_bets/routes/routes.dart';
-import 'firebase_options.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'firebase_options.dart';
+import 'services/firebase/firebase_auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  final authService = FirebaseAuthService();
+  await authService.ensureSignedIn();
   await GetStorage.init();
 
   final player = AudioPlayer();
