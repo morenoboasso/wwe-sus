@@ -46,6 +46,8 @@ dependencies:
   auto_size_text: ^3.0.0
   permission_handler: ^12.0.1
   audioplayers: ^6.5.0
+  riverpod: ^3.2.1
+  flutter_riverpod: ^3.2.1
 
 dev_dependencies:
   flutter_test:

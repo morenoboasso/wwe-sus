@@ -17,6 +17,6 @@ class AppRoutes {
     GetPage(name: mainScreen, page: () => const BottomNavigationBarWidget()),
     GetPage(name: createMatchCard, page: () => const CreateMatchCardPage()),
     GetPage(name: matchCardList, page: () => const MatchCardListPage()),
-    GetPage(name: userRatingPage, page: () =>  RankingPage()),
+    GetPage(name: userRatingPage, page: () => const RankingPage()),
   ];
 }

@@ -33,7 +33,7 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
           borderRadius: BorderRadius.circular(20.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               spreadRadius: 5,
               blurRadius: 15,
               offset: const Offset(0, 3),
@@ -115,13 +115,15 @@ class _WinnerSelectionDialogState extends State<WinnerSelectionDialog> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_selectedWrestler != null) {
+                        final navigator = Navigator.of(context);
+                        final scaffoldMessenger = ScaffoldMessenger.of(context);
                         try {
                           await widget.dbService.updateMatchResult(widget.matchId, _selectedWrestler!);
                           await widget.dbService.updateUserScore(widget.matchId, _selectedWrestler!);
                           widget.onSelectionSaved(widget.matchId, _selectedWrestler!);
-                          Navigator.of(context).pop();
+                          navigator.pop();
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          scaffoldMessenger.showSnackBar(
                             const SnackBar(
                               content: AutoSizeText(
                                 'Errore nel salvataggio della selezione.',

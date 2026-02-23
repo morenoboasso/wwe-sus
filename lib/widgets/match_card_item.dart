@@ -109,16 +109,16 @@ class _MatchCardItemState extends State<MatchCardItem> {
                 : (userSelection != null
                 ? LinearGradient(
               colors: [
-                Colors.blue.withOpacity(0.7),
-                Colors.lightBlueAccent.withOpacity(0.7)
+                Colors.blue.withValues(alpha: 0.7),
+                Colors.lightBlueAccent.withValues(alpha: 0.7)
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             )
                 : LinearGradient(
               colors: [
-                Colors.black.withOpacity(0.6),
-                Colors.black.withOpacity(0.3)
+                Colors.black.withValues(alpha: 0.6),
+                Colors.black.withValues(alpha: 0.3)
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -195,12 +195,14 @@ class _MatchCardItemState extends State<MatchCardItem> {
                           await _fetchData();
                         } catch (e) {
                           debugPrint('Error saving selection: $e');
-                          CustomSnackbar(
-                            color: Colors.red,
-                            context: context,
-                            message: 'Errore nel salvataggio della selezione.',
-                            icon: Icons.report_gmailerrorred,
-                          ).show();
+                          if (mounted) {
+                            CustomSnackbar(
+                              color: Colors.red,
+                              context: context,
+                              message: 'Errore nel salvataggio della selezione.',
+                              icon: Icons.report_gmailerrorred,
+                            ).show();
+                          }
                         }
                       } else {
                         CustomSnackbar(

@@ -91,7 +91,7 @@ class _RankingPageState extends State<RankingPage> {
                           borderRadius: BorderRadius.circular(12.0),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 6.0,
                               offset: const Offset(0, 4),
                             ),
@@ -120,7 +120,7 @@ class _RankingPageState extends State<RankingPage> {
                                 color: Colors.white,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
+                                    color: Colors.black.withValues(alpha: 0.3),
                                     blurRadius: 8.0,
                                     offset: const Offset(0, 4),
                                   ),
@@ -175,6 +175,7 @@ class _RankingPageState extends State<RankingPage> {
     );
   }
   Future<void> _resetRanking() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       final usersSnapshot = await FirebaseFirestore.instance.collection('users').get();
       for (var doc in usersSnapshot.docs) {
@@ -183,12 +184,12 @@ class _RankingPageState extends State<RankingPage> {
       setState(() {
         _rankingFuture = DbService().getUserRanking();
       });
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Classifica resettata!')),
       );
     } catch (e) {
       debugPrint('Errore nel reset della classifica: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Errore nel reset della classifica')),
       );
     }

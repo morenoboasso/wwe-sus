@@ -16,7 +16,7 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
   static final List<Widget> _widgetOptions = <Widget>[
     const MatchCardListPage(),  // Swapped position with CreateMatchCardPage
     const CreateMatchCardPage(), // Swapped position with MatchCardListPage
-     RankingPage(),
+     const RankingPage(),
   ];
 
   void _onItemTapped(int index) {
