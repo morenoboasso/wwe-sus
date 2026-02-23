@@ -11,8 +11,8 @@ class LoginTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextSelectionTheme(
       data: TextSelectionThemeData(
-        selectionColor: ColorsBets.blackHD.withOpacity(0.5),
-        cursorColor: ColorsBets.blackHD.withOpacity(0.9),
+        selectionColor: ColorsBets.blackHD.withValues(alpha: 0.5),
+        cursorColor: ColorsBets.blackHD.withValues(alpha: 0.9),
       ),
       child: TextField(
         // cursor

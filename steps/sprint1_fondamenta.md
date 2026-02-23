@@ -113,6 +113,8 @@ Sul frontend:
   - `AppUser` con il ruolo
 - Le UI admin (creazione/chiusura match) devono essere visibili solo se `role == "admin"`.
 
+**Stato:** completato – aggiunta dipendenza Riverpod, creati provider in `lib/state/auth_providers.dart` per gestire stato Firebase user + AppUser, con helper `isAdminProvider` e `userRoleProvider`. `UserRepository` espone già i metodi richiesti. Ready per logica UI condizionale su ruolo admin.
+
 ---
 
 ## 5. Regole di sicurezza Firebase (bozza concettuale)

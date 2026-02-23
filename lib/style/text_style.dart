@@ -12,7 +12,7 @@ class MemoText {
   static TextStyle get createInputMainText => const TextStyle(
       color: ColorsBets.whiteHD, fontWeight: FontWeight.bold, fontSize: 18);
   static TextStyle get createHintInput => TextStyle(
-      color: ColorsBets.blackHD.withOpacity(0.6),
+      color: ColorsBets.blackHD.withValues(alpha: 0.6),
       fontWeight: FontWeight.w200,
       fontSize: 14);
   static TextStyle get createMatchCardButton => const TextStyle(

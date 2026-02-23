@@ -6,6 +6,7 @@ import 'package:wwe_bets/routes/routes.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'firebase_options.dart';
 import 'services/firebase/firebase_auth_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +23,7 @@ void main() async {
   final box = GetStorage();
   final userName = box.read('userName');
 
-  runApp(MyApp(initialRoute: userName != null ? AppRoutes.mainScreen : AppRoutes.login));
+  runApp(ProviderScope(child: MyApp(initialRoute: userName != null ? AppRoutes.mainScreen : AppRoutes.login)));
 }
 
 class MyApp extends StatelessWidget {

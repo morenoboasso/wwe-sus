@@ -48,3 +48,4 @@ app.*.map.json
 .fvm/
 firebase.json
 lib/services/firebase/firebase_firestore_service.dart
+/.windsurf/rules/cose-style-guide.md

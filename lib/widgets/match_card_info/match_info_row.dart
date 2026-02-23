@@ -33,7 +33,7 @@ class MatchInfoRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4.0),
+                  const SizedBox(height: 4.0),
                   AutoSizeText(
                     title,
                     style: MemoText.thirdRowMatchInfo,
@@ -55,7 +55,7 @@ class MatchInfoRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 4.0),
+                const SizedBox(height: 4.0),
                 AutoSizeText(
                   type,
                   style: MemoText.thirdRowMatchInfo,
