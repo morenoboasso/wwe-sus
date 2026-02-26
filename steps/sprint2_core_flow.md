@@ -6,15 +6,13 @@ Implementare il **core flow**:
 
 - Creazione match (admin)
 - Votazione (user)
-- Supporto `NO_WINNER`
+- Supporto `Nessun Vincitore`
 - Supporto `free_text`
 - Chiusura match (admin)
 
 ---
 
-## 1. Creazione match (admin)
-
-Schermata: `CreateMatchScreen` (`/ui/screens/create_match_screen.dart`)
+## 1. Creazione match (tutti)
 
 Campi:
 
@@ -40,9 +38,11 @@ Logica:
 
 ---
 
+**Stato:** completato – UI aggiornata in `CreateMatchCardPage` con campi titolo/tipo/PPV, switch per `isTitleMatch`/`isMainEvent`, selezione `predictionType`, e lista partecipanti per `standard`. Logica spostata in `CreateMatchController`, con validazione e salvataggio in Firestore via `MatchRepository` usando `serverTimestamp`.
+
 ## 2. Votazione utente
 
-Schermata: `MatchDetailScreen` (`/ui/screens/match_detail_screen.dart`)
+Schermata: **inline nella card** match (no pagina dedicata)
 
 Mostra:
 
@@ -54,8 +54,8 @@ Mostra:
 
 UI:
 
-- Lista pulsanti / RadioListTile per ogni wrestler di `wrestlers`
-- Opzione aggiuntiva `NO_WINNER`
+- Dropdown per ogni wrestler di `wrestlers`
+- Opzione aggiuntiva `Nessun Vincitore`
 - Pulsante `Conferma voto`
 
 Logica:
@@ -63,20 +63,19 @@ Logica:
 - Solo se `status == "open"`.
 - Salva in `votes/{matchId}/userVotes/{userId}`:
   - `type: "standard"`
-  - `winnerId` = wrestler scelto **oppure** `"NO_WINNER"`
+  - `winnerId` = wrestler scelto **oppure** `"Nessun Vincitore"`
   - `winnerText: null`
   - `timestamp = serverTimestamp`
 
 Gestisci:
 - Messaggio "Hai già votato" se esiste già un documento per `userId`.
-  - Puoi consentire update fino a quando il match è `open` (decidi policy).
+- **Non consentire modifiche** al voto dopo il primo invio.
 
 ### Free-text prediction
 
 UI:
 
 - TextField multilinea
-- (Facoltativo) suggerimenti sotto forma di chip cliccabili
 - Pulsante `Conferma voto`
 
 Logica:
@@ -89,21 +88,21 @@ Logica:
 
 ---
 
-## 3. Chiusura match (admin)
+## 3. Chiusura match (chiunque)
 
-Schermata: stessa `MatchDetailScreen`, ma se `admin` e `status == "open"`:
+Schermata: stessa card match, ma se `status == "open"`:
 
 - Se `predictionType == "standard"`:
   - UI simile alla votazione standard, ma per selezionare il **risultato ufficiale**
-  - Opzione `NO_WINNER`
+  - Opzione `Nessun Vincitore`
 - Se `predictionType == "free_text"`:
   - TextField per inserire `resultText` (es. "Cody Rhodes")
 
 Flow:
 
-1. Admin imposta risultato:
+1. Utente imposta risultato:
    - Standard:
-     - `result = wrestlerId` o `"NO_WINNER"`
+     - `result = wrestlerId` o `"Nessun Vincitore"`
      - `resultText = null`
    - Free-text:
      - `result = null`

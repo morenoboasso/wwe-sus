@@ -18,6 +18,13 @@ class VoteRepository {
     return _firestore.collection('votes/$matchId/userVotes');
   }
 
+  Future<List<Vote>> fetchMatchVotes(String matchId) async {
+    final snapshot = await _votesCollection(matchId).get();
+    return snapshot.docs
+        .map((doc) => Vote.fromMap(matchId: matchId, userId: doc.id, data: doc.data()))
+        .toList();
+  }
+
   Future<Vote?> getCurrentUserVote(String matchId) async {
     final user = _auth.currentUser;
     if (user == null) return null;
@@ -45,6 +52,15 @@ class VoteRepository {
     Vote vote,
   ) async {
     await _votesCollection(matchId).doc(vote.userId).set(vote.toMap());
+  }
+
+  Future<void> submitVoteData(String matchId, Map<String, dynamic> data) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    final docRef = _votesCollection(matchId).doc(user.uid);
+    final existing = await docRef.get();
+    if (existing.exists) return;
+    await docRef.set(data, SetOptions(merge: true));
   }
 
   Future<void> deleteVote(String matchId) async {

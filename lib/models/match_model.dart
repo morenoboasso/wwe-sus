@@ -47,6 +47,7 @@ class Match {
     required this.createdAt,
     this.result,
     this.resultText,
+    this.resultTexts,
   });
 
   final String id;
@@ -62,8 +63,14 @@ class Match {
   final DateTime? createdAt;
   final String? result;
   final String? resultText;
+  final List<String>? resultTexts;
 
   factory Match.fromMap(String id, Map<String, dynamic> data) {
+    final resultTextsRaw = data['resultTexts'] as List?;
+    final parsedResultTexts = resultTextsRaw
+        ?.map((value) => value?.toString() ?? '')
+        .where((value) => value.isNotEmpty)
+        .toList();
     return Match(
       id: id,
       title: data['title'] as String? ?? '',
@@ -78,6 +85,7 @@ class Match {
       createdAt: _toDateTime(data['createdAt']),
       result: data['result'] as String?,
       resultText: data['resultText'] as String?,
+      resultTexts: parsedResultTexts,
     );
   }
 
@@ -95,6 +103,7 @@ class Match {
       'createdAt': createdAt,
       'result': result,
       'resultText': resultText,
+      'resultTexts': resultTexts,
     };
   }
 
@@ -111,6 +120,7 @@ class Match {
     DateTime? createdAt,
     String? result,
     String? resultText,
+    List<String>? resultTexts,
   }) {
     return Match(
       id: id,
@@ -126,12 +136,15 @@ class Match {
       createdAt: createdAt ?? this.createdAt,
       result: result ?? this.result,
       resultText: resultText ?? this.resultText,
+      resultTexts: resultTexts ?? this.resultTexts,
     );
   }
 
   bool get isOpen => status == MatchStatus.open;
 
-  bool get hasResult => (result != null && result!.isNotEmpty) || (resultText != null && resultText!.isNotEmpty);
+  bool get hasResult => (result != null && result!.isNotEmpty) ||
+      (resultText != null && resultText!.isNotEmpty) ||
+      (resultTexts != null && resultTexts!.isNotEmpty);
 
   static DateTime? _toDateTime(dynamic value) {
     if (value is Timestamp) return value.toDate();

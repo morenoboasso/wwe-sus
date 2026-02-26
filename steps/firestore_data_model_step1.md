@@ -41,14 +41,14 @@ Definire la struttura definitiva delle collezioni Firestore per l'app WWE SUS, c
 | `status` | `string` (`open`\|`closed`) | sì | `open` | Controlla se si può votare. |
 | `createdBy` | `string` (`userId`) | sì | — | Deve essere un admin. |
 | `createdAt` | `timestamp` | sì | `FieldValue.serverTimestamp()` | Server-side. |
-| `result` | `string` (`wrestlerId`\|`NO_WINNER`\|`null`) | no | `null` | Esito per match standard. |
+| `result` | `string` (`wrestlerId`\|`Nessun Vincitore`\|`null`) | no | `null` | Esito per match standard. |
 | `resultText` | `string` | no | `null` | Testo libero per `free_text`. |
 
 ### `votes/{matchId}/userVotes/{userId}`
 | Campo | Tipo | Obbligatorio | Default | Note |
 |-------|------|--------------|---------|------|
 | `type` | `string` (`standard`\|`free_text`) | sì | — | Copiato dal match al momento del voto. |
-| `winnerId` | `string` (`wrestlerId`\|`NO_WINNER`\|`null`) | condizionale | `null` | Compilato solo per `standard`. |
+| `winnerId` | `string` (`wrestlerId`\|`Nessun Vincitore`\|`null`) | condizionale | `null` | Compilato solo per `standard`. |
 | `winnerText` | `string` | condizionale | `null` | Compilato solo per `free_text`. |
 | `timestamp` | `timestamp` | sì | `FieldValue.serverTimestamp()` | Quando il voto è stato espresso. |
 

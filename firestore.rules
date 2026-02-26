@@ -35,8 +35,11 @@ service cloud.firestore {
       // Read: authenticated users can read matches
       allow read: if request.auth != null;
       
-      // Write: only admins can create/update/delete matches
-      allow write, create, delete: if request.auth != null && isAdmin();
+      // Create/Delete: only admins
+      allow create, delete: if request.auth != null && isAdmin();
+
+      // Update: any authenticated user (for closing matches)
+      allow update: if request.auth != null;
     }
 
     // Votes collection rules (subcollection under matches)

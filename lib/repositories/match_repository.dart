@@ -35,8 +35,27 @@ class MatchRepository {
     });
   }
 
+  Stream<Match?> watchMatch(String matchId) {
+    return _collection.doc(matchId).snapshots().map((doc) {
+      final data = doc.data();
+      if (data == null) return null;
+      return Match.fromMap(doc.id, data);
+    });
+  }
+
+  Future<Match?> fetchMatch(String matchId) async {
+    final doc = await _collection.doc(matchId).get();
+    final data = doc.data();
+    if (data == null) return null;
+    return Match.fromMap(doc.id, data);
+  }
+
   Future<void> createMatch(Match match) async {
     await _collection.doc(match.id).set(match.toMap());
+  }
+
+  Future<void> createMatchWithData(Map<String, dynamic> data) async {
+    await _collection.add(data);
   }
 
   Future<void> updateMatch(String matchId, Map<String, dynamic> data) async {
