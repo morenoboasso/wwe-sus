@@ -12,27 +12,6 @@ Implementare:
 
 ---
 
-## 1. Normalizzazione free-text
-
-Funzione di utilità (es. in `/lib/services/text_normalizer.dart`):
-
-- **Passi**:
-  - `toLowerCase()`
-  - `trim()`
-  - sostituzione spazi multipli con singolo spazio
-  - mapping alias (es. mappa `Map<String, String>`):
-    - `"the rock" -> "rock"`
-    - `"rock" -> "rock"`
-    - `"cm punk" -> "punk"`
-    - `"punk" -> "punk"`
-    - `"cody" -> "cody rhodes"`
-
-Comparator:
-
-- `normalize(voteText) == normalize(resultText)`
-
----
-
 ## 2. Calcolo punti per singolo voto
 
 Regole:
@@ -46,7 +25,7 @@ Regole:
     - `0`
 - **Free_text**:
   - Se `normalize(voteText) == normalize(resultText)`:
-    - `3`
+    - `5`
   - Altrimenti:
     - `0`
 

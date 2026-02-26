@@ -17,6 +17,25 @@ class UserRepository {
   CollectionReference<Map<String, dynamic>> get _usersCollection =>
       _firestore.collection('users');
 
+  Future<AppUser?> getUserById(String userId) async {
+    final doc = await _usersCollection.doc(userId).get();
+    final data = doc.data();
+    if (data == null) return null;
+    return AppUser.fromMap(doc.id, data);
+  }
+
+  Future<List<AppUser>> fetchAllUsers({
+    String orderBy = 'points',
+    bool descending = true,
+  }) async {
+    final query = _usersCollection.orderBy(orderBy, descending: descending);
+    final snapshot = await query.get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return AppUser.fromMap(doc.id, data);
+    }).toList();
+  }
+
   Future<AppUser?> getCurrentUserOnce() async {
     final firebaseUser = _auth.currentUser;
     if (firebaseUser == null) return null;
