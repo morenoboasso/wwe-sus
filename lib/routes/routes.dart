@@ -3,6 +3,7 @@ import 'package:wwe_bets/pages/login_page.dart';
 import '../pages/create_match_card_page.dart';
 import '../pages/match_card_list_page.dart'; 
 import '../pages/user_ranking_page.dart';
+import '../pages/profile_screen.dart';
 import '../pages/user_generator_page.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
 
@@ -13,6 +14,7 @@ class AppRoutes {
   static const String matchCardList = '/matchCardList';
   static const String userRatingPage= '/userRanking';
   static const String userGeneratorPage = '/userGenerator';
+  static const String profileScreen = '/profile';
 
   static final routes = [
     GetPage(name: login, page: () => const LoginPage()),
@@ -21,5 +23,6 @@ class AppRoutes {
     GetPage(name: matchCardList, page: () => const MatchCardListPage()),
     GetPage(name: userRatingPage, page: () => const RankingPage()),
     GetPage(name: userGeneratorPage, page: () => const UserGeneratorPage()),
+    GetPage(name: profileScreen, page: () => const ProfileScreen()),
   ];
 }

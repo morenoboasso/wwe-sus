@@ -24,6 +24,23 @@ class UserRepository {
     return AppUser.fromMap(doc.id, data);
   }
 
+  Stream<AppUser?> watchUserById(String userId) {
+    return _usersCollection.doc(userId).snapshots().map((doc) {
+      final data = doc.data();
+      if (data == null) return null;
+      return AppUser.fromMap(doc.id, data);
+    });
+  }
+
+  Stream<AppUser?> watchUserByName(String name) {
+    return _usersCollection.where('name', isEqualTo: name).limit(1).snapshots().map((snapshot) {
+      if (snapshot.docs.isEmpty) return null;
+      final doc = snapshot.docs.first;
+      final data = doc.data();
+      return AppUser.fromMap(doc.id, data);
+    });
+  }
+
   Future<List<AppUser>> fetchAllUsers({
     String orderBy = 'points',
     bool descending = true,

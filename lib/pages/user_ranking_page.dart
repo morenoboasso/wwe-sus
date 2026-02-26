@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
-import '../style/text_style.dart';
 import '../routes/routes.dart';
 
 class RankingPage extends StatefulWidget {
@@ -49,7 +48,7 @@ class _RankingPageState extends State<RankingPage> with SingleTickerProviderStat
                         Tab(text: 'Generale'),
                         Tab(text: 'Streak'),
                         Tab(text: 'Accuratezza'),
-                        Tab(text: 'Ultimi match'),
+                        Tab(text: 'Peggiori'),
                       ],
                     ),
                   ),
@@ -59,7 +58,7 @@ class _RankingPageState extends State<RankingPage> with SingleTickerProviderStat
                         _RankingTab(orderBy: 'points', labelBuilder: _RankingPageState._pointsLabel),
                         _RankingTab(orderBy: 'streak', labelBuilder: _RankingPageState._streakLabel),
                         _RankingTab(orderBy: 'accuracy', labelBuilder: _RankingPageState._accuracyLabel),
-                        _LatestMatchesPlaceholder(),
+                        _RankingTab(orderBy: 'wrongPredictions', labelBuilder: _RankingPageState._worstLabel),
                       ],
                     ),
                   ),
@@ -75,6 +74,7 @@ class _RankingPageState extends State<RankingPage> with SingleTickerProviderStat
   static String _pointsLabel(AppUser user) => 'Punti: ${user.points}';
   static String _streakLabel(AppUser user) => 'Streak: ${user.streak}';
   static String _accuracyLabel(AppUser user) => 'Accuratezza: ${(user.accuracy * 100).toStringAsFixed(1)}%';
+  static String _worstLabel(AppUser user) => 'Sbagliati: ${user.wrongPredictions}';
 }
 
 class _RankingTab extends StatelessWidget {
@@ -119,22 +119,6 @@ class _RankingTab extends StatelessWidget {
     );
   }
 }
-
-class _LatestMatchesPlaceholder extends StatelessWidget {
-  const _LatestMatchesPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Classifica ultimi match in arrivo',
-        style: MemoText.noMatches,
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-}
-
 class _RankingCard extends StatelessWidget {
   const _RankingCard({
     required this.position,
