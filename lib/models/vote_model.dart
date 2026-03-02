@@ -19,6 +19,8 @@ class Vote {
   final String? winnerText;
   final DateTime? timestamp;
 
+  bool get isEmpty => (winnerId == null || winnerId!.isEmpty) && (winnerText == null || winnerText!.isEmpty);
+
   bool get isStandard => type == PredictionType.standard;
 
   bool get isFreeText => type == PredictionType.freeText;
@@ -45,6 +47,17 @@ class Vote {
       'winnerText': winnerText,
       'timestamp': timestamp,
     };
+  }
+
+  factory Vote.empty({required String userId, required String matchId}) {
+    return Vote(
+      matchId: matchId,
+      userId: userId,
+      type: PredictionType.standard,
+      winnerId: null,
+      winnerText: null,
+      timestamp: null,
+    );
   }
 
   Vote copyWith({

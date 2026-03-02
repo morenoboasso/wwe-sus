@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
-
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
 import '../routes/routes.dart';
@@ -13,10 +11,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userRepository = UserRepository();
-    final storedUserName = GetStorage().read<String>('userName');
-    final Stream<AppUser?> userStream = storedUserName != null
-        ? userRepository.watchUserByName(storedUserName)
-        : userRepository.watchCurrentUser();
+    final Stream<AppUser?> userStream = userRepository.watchCurrentUser();
 
     return Scaffold(
       body: Stack(
@@ -51,7 +46,35 @@ class ProfileScreen extends StatelessWidget {
                     children: [
                       _Header(user: user),
                       const SizedBox(height: 16),
-                      _StatsGrid(user: user),
+                      Expanded(
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          children: [
+                            _StatsSection(
+                              title: 'Globale',
+                              tiles: [
+                                _StatTileData(label: 'Punti', value: '${user.points}'),
+                                _StatTileData(label: 'Streak', value: '${user.streak}'),
+                                _StatTileData(label: 'Accuracy', value: '${(user.accuracy * 100).toStringAsFixed(1)}%'),
+                                _StatTileData(label: 'Corretti', value: '${user.correctPredictions}'),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _StatsSection(
+                              title: 'Stagione',
+                              tiles: [
+                                _StatTileData(label: 'Punti', value: '${user.seasonPoints}'),
+                                _StatTileData(label: 'Streak', value: '${user.seasonStreak}'),
+                                _StatTileData(
+                                  label: 'Accuracy',
+                                  value: '${(user.seasonAccuracy * 100).toStringAsFixed(1)}%',
+                                ),
+                                _StatTileData(label: 'Corretti', value: '${user.seasonCorrectPredictions}'),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -95,10 +118,6 @@ class _Header extends StatelessWidget {
                 user.name,
                 style: MemoText.createInputMainText,
               ),
-              Text(
-                'Punti totali: ${user.points}',
-                style: MemoText.thirdRowMatchInfo,
-              ),
             ],
           ),
         ),
@@ -107,35 +126,72 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({required this.user});
+class _StatsSection extends StatelessWidget {
+  const _StatsSection({required this.title, required this.tiles});
 
-  final AppUser user;
+  final String title;
+  final List<_StatTileData> tiles;
 
   @override
   Widget build(BuildContext context) {
+    final isSeason = title.toLowerCase().contains('stagione');
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: ColorsBets.whiteHD.withValues(alpha: 0.12),
+        color: (isSeason ? ColorsBets.whiteHD.withValues(alpha: 0.14) : ColorsBets.whiteHD.withValues(alpha: 0.10)),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: (isSeason
+              ? ColorsBets.whiteHD.withValues(alpha: 0.28)
+              : ColorsBets.whiteHD.withValues(alpha: 0.18)),
+        ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(child: _StatTile(label: 'Streak', value: '${user.streak}')),
-              const SizedBox(width: 8),
-              Expanded(child: _StatTile(label: 'Accuracy', value: '${(user.accuracy * 100).toStringAsFixed(1)}%')),
+              Expanded(
+                child: Text(
+                  title,
+                  style: MemoText.createInputMainText.copyWith(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.14 : 0.10),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.35 : 0.22)),
+                ),
+                child: Text(
+                  isSeason ? 'SEASON' : 'GLOBAL',
+                  style: MemoText.thirdRowMatchInfo.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(child: _StatTile(label: 'Corretti', value: '${user.correctPredictions}')),
-              const SizedBox(width: 8),
-              Expanded(child: _StatTile(label: 'Sbagliati', value: '${user.wrongPredictions}')),
+              Expanded(child: _StatTile(tile: tiles[0], isSeason: isSeason)),
+              const SizedBox(width: 10),
+              Expanded(child: _StatTile(tile: tiles[1], isSeason: isSeason)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _StatTile(tile: tiles[2], isSeason: isSeason)),
+              const SizedBox(width: 10),
+              Expanded(child: _StatTile(tile: tiles[3], isSeason: isSeason)),
             ],
           ),
         ],
@@ -144,31 +200,39 @@ class _StatsGrid extends StatelessWidget {
   }
 }
 
-class _StatTile extends StatelessWidget {
-  const _StatTile({required this.label, required this.value});
+class _StatTileData {
+  const _StatTileData({required this.label, required this.value});
 
   final String label;
   final String value;
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({required this.tile, required this.isSeason});
+
+  final _StatTileData tile;
+  final bool isSeason;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: ColorsBets.whiteHD.withValues(alpha: 0.08),
+        color: ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.10 : 0.08),
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.24 : 0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
-            style: MemoText.thirdRowMatchInfo,
+            tile.label,
+            style: MemoText.thirdRowMatchInfo.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 6),
           Text(
-            value,
-            style: MemoText.createInputMainText,
+            tile.value,
+            style: MemoText.createInputMainText.copyWith(color: Colors.white),
           ),
         ],
       ),

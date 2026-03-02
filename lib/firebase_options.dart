@@ -23,10 +23,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -55,14 +52,24 @@ class DefaultFirebaseOptions {
     messagingSenderId: '508179340668',
     projectId: 'wwe-sus',
     authDomain: 'wwe-sus.firebaseapp.com',
-    storageBucket: 'wwe-sus.appspot.com',
+    storageBucket: 'wwe-sus.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAU7qXjsQ4HFAhznFxeMIuE8AOJKiCnhP0',
-    appId: '1:508179340668:android:600850bc8b41dbcc9c18f9',
+    appId: '1:508179340668:android:c4b402cf09cd323f9c18f9',
     messagingSenderId: '508179340668',
     projectId: 'wwe-sus',
-    storageBucket: 'wwe-sus.appspot.com',
+    storageBucket: 'wwe-sus.firebasestorage.app',
   );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAsuNCJQJhw_xPKotsuA35KCR_FsmOrivc',
+    appId: '1:508179340668:ios:8027156a358298659c18f9',
+    messagingSenderId: '508179340668',
+    projectId: 'wwe-sus',
+    storageBucket: 'wwe-sus.firebasestorage.app',
+    iosBundleId: 'com.example.wweBets',
+  );
+
 }

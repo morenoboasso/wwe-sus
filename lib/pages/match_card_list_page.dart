@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../controllers/match_list_controller.dart';
 import '../models/match_list_item.dart';
+import '../models/match_model.dart';
 import '../repositories/match_repository.dart';
+import '../repositories/season_repository.dart';
 import '../style/text_style.dart';
 import '../widgets/common/custom_snackbar.dart';
 import '../widgets/match_card_item.dart';

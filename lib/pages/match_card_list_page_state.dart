@@ -3,14 +3,45 @@ part of 'match_card_list_page.dart';
 class MatchCardListPageState extends State<MatchCardListPage> {
   final MatchListController _controller = MatchListController();
   final MatchRepository _matchRepository = MatchRepository();
+  final SeasonRepository _seasonRepository = SeasonRepository();
   List<MatchListItem> _items = [];
   bool _isLoading = true;
   bool _hasError = false;
+  String? _seasonTitle;
 
   @override
   void initState() {
     super.initState();
-    _loadMatches();
+    _loadInitial();
+  }
+
+  Future<void> _loadInitial() async {
+    await Future.wait([
+      _loadSeasonTitle(),
+      _loadMatches(),
+    ]);
+  }
+
+  Future<void> _loadSeasonTitle() async {
+    try {
+      final season = await _seasonRepository.fetchLatestOpenSeason();
+      if (!mounted) return;
+      setState(() {
+        _seasonTitle = season?.name.isNotEmpty == true ? season!.name : null;
+      });
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> _finalizePpv(String ppvName) async {
+    try {
+      await _controller.finalizePpv(ppvName);
+      _showSuccessSnackbar('PPV terminato e bonus calcolato');
+      _refreshMatches();
+    } catch (e) {
+      _showErrorSnackbar('Errore nel terminare il PPV');
+    }
   }
 
   Future<void> _loadMatches() async {
@@ -128,22 +159,39 @@ class MatchCardListPageState extends State<MatchCardListPage> {
                       children: [
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                          child: TabBar(
-                            indicatorColor: Colors.white,
-                            labelColor: Colors.white,
-                            unselectedLabelColor: Colors.grey,
-                            tabs: [
-                              _buildTabWithBadge(
-                                'Nuovi',
-                                _isLoading ? 0 : sections.nonVotati.length,
-                              ),
-                              _buildTabWithBadge(
-                                'Votati',
-                                _isLoading ? 0 : sections.votatiNonConclusi.length,
-                              ),
-                              _buildTabWithBadge(
-                                'Completati',
-                                _isLoading ? 0 : sections.completati.length,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              if (_seasonTitle != null) ...[
+                                Text(
+                                  _seasonTitle!,
+                                  style: MemoText.secondRowMatchInfo.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.8,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 6),
+                              ],
+                              TabBar(
+                                indicatorColor: Colors.white,
+                                labelColor: Colors.white,
+                                unselectedLabelColor: Colors.grey,
+                                tabs: [
+                                  _buildTabWithBadge(
+                                    'Nuovi',
+                                    _isLoading ? 0 : sections.nonVotati.length,
+                                  ),
+                                  _buildTabWithBadge(
+                                    'Votati',
+                                    _isLoading ? 0 : sections.votatiNonConclusi.length,
+                                  ),
+                                  _buildTabWithBadge(
+                                    'Completati',
+                                    _isLoading ? 0 : sections.completati.length,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -185,20 +233,7 @@ class MatchCardListPageState extends State<MatchCardListPage> {
       );
     }
 
-    return SingleChildScrollView(
-      child: Column(
-        children: matches.map((item) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: MatchCardItem(
-              item: item,
-              onVoteSubmitted: _refreshMatches,
-              onDelete: () => _deleteMatchCard(item.match.id),
-            ),
-          );
-        }).toList(),
-      ),
-    );
+    return _buildGroupedMatchList(matches);
   }
 
   Widget _buildMatchListShell() {
@@ -216,6 +251,82 @@ class MatchCardListPageState extends State<MatchCardListPage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildGroupedMatchList(List<MatchListItem> matches) {
+    final grouped = <String, List<MatchListItem>>{};
+
+    for (final item in matches) {
+      final key = (item.match.ppvName.isNotEmpty ? item.match.ppvName : 'PPV Sconosciuto').trim();
+      grouped.putIfAbsent(key, () => []).add(item);
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: grouped.entries.map((entry) {
+          final ppvNameOriginal = entry.key;
+          final ppvName = ppvNameOriginal.toUpperCase();
+          final items = entry.value;
+          final canFinalize = items.isNotEmpty && items.every((item) => item.match.status == MatchStatus.closed);
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (canFinalize)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 6),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Colors.white, width: 1.4),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: () => _finalizePpv(ppvNameOriginal),
+                    child: const Text(
+                      'Termina PPV (calcola bonus)',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 6),
+                child: Text(
+                  ppvName,
+                  style: MemoText.secondRowMatchInfo.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+              Divider(
+                color: Colors.white.withValues(alpha: 0.3),
+                thickness: 1.2,
+              ),
+              ...items.map(
+                (item) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: MatchCardItem(
+                    item: item,
+                    onVoteSubmitted: _refreshMatches,
+                    onDelete: () => _deleteMatchCard(item.match.id),
+                  ),
+                ),
+              ),
+              Divider(
+                color: Colors.white.withValues(alpha: 0.2),
+                thickness: 1,
+              ),
+            ],
+          );
+        }).toList(),
+      ),
     );
   }
 }

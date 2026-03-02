@@ -10,8 +10,8 @@ class PointsService {
   }
 
   int _calculateStandardPoints(Match match, Vote vote) {
-    final winnerId = vote.winnerId;
-    final result = match.result;
+    final winnerId = _normalize(vote.winnerId);
+    final result = _normalize(match.result);
     if (winnerId == null || result == null) return 0;
     if (winnerId != result) return 0;
 
@@ -26,19 +26,25 @@ class PointsService {
   }
 
   int _calculateFreeTextPoints(Match match, Vote vote) {
-    final voteText = vote.winnerText;
+    final voteText = _normalize(vote.winnerText);
     if (voteText == null) return 0;
 
-    final resultTexts = match.resultTexts;
+    final resultTexts = match.resultTexts?.map(_normalize).whereType<String>().toList();
     if (resultTexts != null && resultTexts.contains(voteText)) {
       return 5;
     }
 
-    final singleResultText = match.resultText;
+    final singleResultText = _normalize(match.resultText);
     if (singleResultText != null && singleResultText == voteText) {
       return 5;
     }
 
     return 0;
+  }
+
+  String? _normalize(String? value) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed.toLowerCase();
   }
 }

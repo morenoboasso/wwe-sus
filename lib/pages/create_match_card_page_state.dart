@@ -127,14 +127,31 @@ class CreateMatchCardPageState extends State<CreateMatchCardPage> {
                     Text('Tipo di previsione*', style: MemoText.createInputMainText),
                     const SizedBox(height: 8),
                     SegmentedButton<PredictionType>(
+                      style: ButtonStyle(
+                        side: WidgetStateProperty.all(
+                          const BorderSide(color: Colors.white, width: 1.0),
+                        ),
+                        backgroundColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return Colors.white;
+                          }
+                          return Colors.white.withValues(alpha: 0.12);
+                        }),
+                        foregroundColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return Colors.black;
+                          }
+                          return Colors.white;
+                        }),
+                      ),
                       segments: const [
                         ButtonSegment<PredictionType>(
                           value: PredictionType.standard,
-                          label: Text('Preimpostati', style: TextStyle(color: Colors.white)),
+                          label: Text('Preimpostati'),
                         ),
                         ButtonSegment<PredictionType>(
                           value: PredictionType.freeText,
-                          label: Text('Campo Libero', style: TextStyle(color: Colors.white)),
+                          label: Text('Campo Libero'),
                         ),
                       ],
                       selected: <PredictionType>{_predictionType},

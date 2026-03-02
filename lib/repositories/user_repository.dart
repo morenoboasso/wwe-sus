@@ -24,6 +24,38 @@ class UserRepository {
     return AppUser.fromMap(doc.id, data);
   }
 
+  Future<void> ensureCurrentUserProfile({required String name, String? photo}) async {
+    final firebaseUser = _auth.currentUser;
+    if (firebaseUser == null) return;
+
+    final docRef = _usersCollection.doc(firebaseUser.uid);
+    final snap = await docRef.get();
+
+    if (!snap.exists) {
+      await docRef.set({
+        'name': name,
+        'photo': photo ?? '',
+        'points': 0,
+        'seasonPoints': 0,
+        'correctPredictions': 0,
+        'seasonCorrectPredictions': 0,
+        'wrongPredictions': 0,
+        'seasonWrongPredictions': 0,
+        'streak': 0,
+        'seasonStreak': 0,
+        'accuracy': 0.0,
+        'seasonAccuracy': 0.0,
+        'role': AppUserRole.user.value,
+      });
+      return;
+    }
+
+    await docRef.set({
+      'name': name,
+      if (photo != null) 'photo': photo,
+    }, SetOptions(merge: true));
+  }
+
   Stream<AppUser?> watchUserById(String userId) {
     return _usersCollection.doc(userId).snapshots().map((doc) {
       final data = doc.data();

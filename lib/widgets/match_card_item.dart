@@ -8,8 +8,6 @@ import '../models/vote_model.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import 'common/custom_snackbar.dart';
-import 'match_card_info/match_info_row.dart';
-import 'match_card_info/wrestler_list.dart';
 
 class MatchCardItem extends StatefulWidget {
   const MatchCardItem({
@@ -48,59 +46,62 @@ class MatchCardItemState extends State<MatchCardItem> {
     final matchWinner = widget.item.matchResult;
     final predictionType = widget.item.match.predictionType;
     final isOpen = widget.item.match.status == MatchStatus.open;
+    final importanceLabel = _importanceLabel(widget.item.match);
 
     if (_freeTextController.text.isEmpty && widget.item.userVote?.winnerText != null) {
       _freeTextController.text = widget.item.userVote!.winnerText!;
     }
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isExpanded = !_isExpanded;
-        });
-      },
-      child: Card(
-        elevation: 4.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
-        ),
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: isMatchCompleted
-                ? LinearGradient(
-              colors: [
-                Colors.amberAccent.shade700,
-                Colors.amberAccent.shade200,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
-                : (userSelection != null
-                ? LinearGradient(
-              colors: [
-                Colors.blue.withValues(alpha: 0.7),
-                Colors.lightBlueAccent.withValues(alpha: 0.7)
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
-                : LinearGradient(
-              colors: [
-                Colors.black.withValues(alpha: 0.6),
-                Colors.black.withValues(alpha: 0.3)
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )),
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
+    return Padding(
+      padding: EdgeInsets.only(top: importanceLabel != null ? 12 : 0),
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _isExpanded = !_isExpanded;
+          });
+        },
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.topCenter,
+          children: [
+            Card(
+              elevation: 0,
+              color: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isMatchCompleted
+                        ? [
+                            Colors.amberAccent.withValues(alpha: 0.28),
+                            Colors.amberAccent.withValues(alpha: 0.16),
+                          ]
+                        : (userSelection != null
+                            ? [
+                                Colors.blue.withValues(alpha: 0.26),
+                                Colors.lightBlueAccent.withValues(alpha: 0.14),
+                              ]
+                            : [
+                                Colors.black.withValues(alpha: 0.22),
+                                Colors.black.withValues(alpha: 0.12),
+                              ]),
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(15.0),
+                  border: Border.all(
+                    color: ColorsBets.whiteHD.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -134,50 +135,52 @@ class MatchCardItemState extends State<MatchCardItem> {
                     ),
                   ],
                 ),
-
-                if (_isExpanded) ...[
-                  MatchInfoRow(
-                    title: widget.item.match.title,
-                    type: widget.item.match.type,
-                  ),
-                  const SizedBox(height: 20.0),
-                ],
-                if (_isExpanded && predictionType != PredictionType.freeText)
-                  WrestlerList(wrestlers: widget.item.match.wrestlers)
-                else if (!_isExpanded && predictionType == PredictionType.freeText)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                    child: Text(
-                      widget.item.match.type,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                const SizedBox(height: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Match: ${widget.item.match.title}',
+                      style: MemoText.secondRowMatchInfo.copyWith(color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
-                  )
-                else if (!_isExpanded)
-                  WrestlerList(wrestlers: widget.item.match.wrestlers),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.item.match.type,
+                      style: MemoText.thirdRowMatchInfo.copyWith(color: Colors.white70),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+                if (isOpen)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: _buildVoteProgress(predictionType),
+                  ),
+
                 if (_isExpanded) ...[
-                  const SizedBox(height: 20.0),
+                  const Divider(color: Colors.black26, thickness: 2),
+                  const SizedBox(height: 12),
                   if (userSelection != null) ...[
-                    const Divider(color: Colors.black26, thickness: 2),
-                    const SizedBox(height: 20),
                     Text(
                       'Hai votato: $userSelection',
                       style: const TextStyle(color: Colors.white),
                     ),
-                    if (matchWinner != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Vincitore: $matchWinner',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    const SizedBox(height: 8),
+                  ],
+                  if (matchWinner != null && isMatchCompleted && userSelection != null) ...[
+                    const Divider(color: Colors.black26, thickness: 2),
+                    const SizedBox(height: 10),
+                  ],
+                  if (matchWinner != null && isMatchCompleted) ...[
+                    Text(
+                      'Vincitore: $matchWinner',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
+                    ),
+                    const SizedBox(height: 10),
                   ],
                   if (!isMatchCompleted && userSelection == null)
                     _buildVoteSection(
@@ -185,26 +188,141 @@ class MatchCardItemState extends State<MatchCardItem> {
                       isOpen: isOpen,
                       hasVoted: widget.item.hasVoted,
                     ),
-                  if (_isExpanded && isOpen && userSelection != null)
+                  if (isOpen && userSelection != null)
                     _buildAdminCloseSection(predictionType: predictionType),
+                  const SizedBox(height: 16),
                   TextButton.icon(
-                    icon: const Icon(Icons.delete, color: Colors.black, size: 16),
-                    onPressed: widget.onDelete,
+                    icon: const Icon(Icons.delete, color: Colors.white, size: 16),
+                    onPressed: _showDeleteConfirmation,
                     label: const Text(
                       'Elimina Match',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Colors.white,
                         decoration: TextDecoration.underline,
-                        decorationColor: Colors.black,
+                        decorationColor: Colors.white,
                       ),
                     ),
                   ),
                 ],
-              ],
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
+            if (importanceLabel != null)
+              Positioned(
+                top: -6,
+                child: _buildImportanceBadge(importanceLabel),
+              ),
+          ],
         ),
       ),
+    );
+  }
+
+  String? _importanceLabel(Match match) {
+    if (match.isMainEvent && match.isTitleMatch) {
+      return 'MAIN EVENT + TITLE MATCH';
+    }
+    if (match.isMainEvent) {
+      return 'MAIN EVENT';
+    }
+    if (match.isTitleMatch) {
+      return 'TITLE MATCH';
+    }
+    return null;
+  }
+
+  Widget _buildImportanceBadge(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: ColorsBets.whiteHD,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: ColorsBets.blackHD, width: 1.5),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: ColorsBets.blackHD,
+          fontWeight: FontWeight.w800,
+          fontSize: 11,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVoteProgress(PredictionType predictionType) {
+    final stats = widget.item.voteStats;
+    final totalLabel = '${stats.totalVotes} ${stats.totalVotes == 1 ? 'utente ha votato' : 'utenti hanno votato'}';
+
+    if (predictionType == PredictionType.freeText) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            totalLabel,
+            style: MemoText.thirdRowMatchInfo.copyWith(color: Colors.white),
+          ),
+        ],
+      );
+    }
+
+    final wrestlers = widget.item.match.wrestlers;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          totalLabel,
+          style: MemoText.thirdRowMatchInfo.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: 8),
+        ...wrestlers.map((wrestler) {
+          final percentValue = stats.percentageFor(wrestler);
+          final percentLabel = (percentValue * 100).toStringAsFixed(0);
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        wrestler,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '$percentLabel%',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    minHeight: 8,
+                    value: percentValue,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 
@@ -212,7 +330,7 @@ class MatchCardItemState extends State<MatchCardItem> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         const Divider(color: Colors.black26, thickness: 2),
         const SizedBox(height: 10),
         Text(
@@ -242,13 +360,25 @@ class MatchCardItemState extends State<MatchCardItem> {
           items: selectable.map((wrestler) {
             return DropdownMenuItem<String>(
               value: wrestler,
-              child: Text(
-                wrestler,
-                style: const TextStyle(
-                  color: ColorsBets.whiteHD,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
+              child: Container
+                (
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: ColorsBets.whiteHD.withValues(alpha: 0.16),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  wrestler,
+                  style: const TextStyle(
+                    color: ColorsBets.whiteHD,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
                 ),
               ),
             );
@@ -309,8 +439,6 @@ class MatchCardItemState extends State<MatchCardItem> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Divider(color: Colors.black26, thickness: 2),
-        const SizedBox(height: 10.0),
         if (predictionType == PredictionType.standard)
           _buildStandardVote(isOpen: isOpen, hasVoted: hasVoted)
         else
@@ -371,8 +499,8 @@ class MatchCardItemState extends State<MatchCardItem> {
         ElevatedButton(
           onPressed: (isOpen && !hasVoted) ? _confirmStandardVote : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            side: const BorderSide(color: Colors.black, width: 2.0),
+            backgroundColor: Colors.white,
+            side: const BorderSide(color: Colors.white, width: 2.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
@@ -421,8 +549,8 @@ class MatchCardItemState extends State<MatchCardItem> {
         ElevatedButton(
           onPressed: (isOpen && !hasVoted) ? _confirmFreeTextVote : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            side: const BorderSide(color: Colors.black, width: 2.0),
+            backgroundColor: Colors.white,
+            side: const BorderSide(color: Colors.white, width: 2.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
@@ -522,6 +650,7 @@ class MatchCardItemState extends State<MatchCardItem> {
               );
             }
 
+            const noneOptionLabel = 'Nessuno dei precedenti';
             final votes = snapshot.data ?? [];
             final counts = <String, int>{};
             for (final vote in votes) {
@@ -529,26 +658,63 @@ class MatchCardItemState extends State<MatchCardItem> {
               if (text == null || text.isEmpty) continue;
               counts[text] = (counts[text] ?? 0) + 1;
             }
+
             final entries = counts.entries.toList()
               ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
+
+            final hasNoneOption = entries.any((entry) => entry.key == noneOptionLabel);
+            if (hasNoneOption) {
+              entries.removeWhere((entry) => entry.key == noneOptionLabel);
+            }
+            entries.add(MapEntry(noneOptionLabel, counts[noneOptionLabel] ?? 0));
 
             return StatefulBuilder(
               builder: (context, setDialogState) {
                 return AlertDialog(
-                  title: const Text('Seleziona Vincitori'),
+                  backgroundColor: ColorsBets.blackHD,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    side: const BorderSide(color: ColorsBets.whiteHD, width: 1.4),
+                  ),
+                  title: const Text(
+                    'Seleziona Vincitori',
+                    style: TextStyle(
+                      color: ColorsBets.whiteHD,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
                   content: SizedBox(
                     width: double.maxFinite,
                     child: entries.isEmpty
-                        ? const Text('Nessun voto disponibile.')
-                        : ListView.builder(
+                        ? const Text(
+                            'Nessun voto disponibile.',
+                            style: TextStyle(color: ColorsBets.whiteHD),
+                          )
+                        : ListView.separated(
                             shrinkWrap: true,
                             itemCount: entries.length,
+                            separatorBuilder: (_, __) => Divider(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              height: 10,
+                            ),
                             itemBuilder: (context, index) {
                               final entry = entries[index];
                               final isSelected = selectedTexts.contains(entry.key);
+
                               return CheckboxListTile(
                                 value: isSelected,
-                                title: Text('${entry.key} (${entry.value})'),
+                                dense: true,
+                                activeColor: Colors.amber,
+                                checkColor: ColorsBets.blackHD,
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(
+                                  '${entry.key} (${entry.value})',
+                                  style: const TextStyle(
+                                    color: ColorsBets.whiteHD,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 controlAffinity: ListTileControlAffinity.leading,
                                 onChanged: (value) {
                                   setDialogState(() {
@@ -563,14 +729,29 @@ class MatchCardItemState extends State<MatchCardItem> {
                             },
                           ),
                   ),
+                  actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Annulla'),
+                      child: const Text(
+                        'Annulla',
+                        style: TextStyle(color: ColorsBets.whiteHD, fontWeight: FontWeight.w600),
+                      ),
                     ),
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorsBets.whiteHD,
+                        foregroundColor: ColorsBets.blackHD,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
                       onPressed: () => Navigator.of(context).pop(selectedTexts),
-                      child: const Text('Conferma'),
+                      child: const Text(
+                        'Conferma',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 );
@@ -629,6 +810,62 @@ class MatchCardItemState extends State<MatchCardItem> {
       widget.onVoteSubmitted();
     } catch (e) {
       _showError('Errore durante il salvataggio.');
+    }
+  }
+
+  Future<void> _showDeleteConfirmation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: ColorsBets.blackHD,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: ColorsBets.whiteHD, width: 1.4),
+          ),
+          title: const Text(
+            'Eliminare il match?',
+            style: TextStyle(
+              color: ColorsBets.whiteHD,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.6,
+            ),
+          ),
+          content: const Text(
+            'Questa azione rimuoverà il match e i pronostici associati.',
+            style: TextStyle(color: ColorsBets.whiteHD),
+          ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(
+                'Annulla',
+                style: TextStyle(color: ColorsBets.whiteHD, fontWeight: FontWeight.w600),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorsBets.whiteHD,
+                foregroundColor: ColorsBets.blackHD,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                'Elimina',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      widget.onDelete();
     }
   }
 

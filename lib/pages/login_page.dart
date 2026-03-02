@@ -7,6 +7,7 @@ import 'package:wwe_bets/style/color_style.dart';
 import 'package:wwe_bets/style/text_style.dart';
 import 'package:wwe_bets/widgets/login/login_input.dart';
 import 'package:wwe_bets/services/db_service.dart';
+import '../repositories/user_repository.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -141,12 +142,13 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     if (userName.isNotEmpty) {
       userName = userName[0].toUpperCase() + userName.substring(1);
     }
+    final userRepository = UserRepository();
     bool nameExists = await dbService.checkUserNameExists(userName);
     if (mounted) {
       if (nameExists) {
+        await userRepository.ensureCurrentUserProfile(name: userName);
         Get.offNamed(AppRoutes.mainScreen);
         GetStorage().write('userName', userName);
-        FocusScope.of(context).unfocus();
       } else {
         Vibration.vibrate(duration: 200, amplitude: 128);
         Get.snackbar(

@@ -4,7 +4,6 @@ import '../pages/create_match_card_page.dart';
 import '../pages/match_card_list_page.dart'; 
 import '../pages/user_ranking_page.dart';
 import '../pages/profile_screen.dart';
-import '../pages/user_generator_page.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
 
 class AppRoutes {
@@ -22,7 +21,6 @@ class AppRoutes {
     GetPage(name: createMatchCard, page: () => const CreateMatchCardPage()),
     GetPage(name: matchCardList, page: () => const MatchCardListPage()),
     GetPage(name: userRatingPage, page: () => const RankingPage()),
-    GetPage(name: userGeneratorPage, page: () => const UserGeneratorPage()),
     GetPage(name: profileScreen, page: () => const ProfileScreen()),
   ];
 }
