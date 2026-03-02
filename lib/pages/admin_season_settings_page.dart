@@ -4,6 +4,7 @@ import '../models/season_model.dart';
 import '../models/user_model.dart';
 import '../repositories/season_repository.dart';
 import '../repositories/user_repository.dart';
+import '../services/season_service.dart';
 import '../style/color_style.dart';
 
 class AdminSeasonSettingsPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class AdminSeasonSettingsPage extends StatefulWidget {
 class _AdminSeasonSettingsPageState extends State<AdminSeasonSettingsPage> {
   final UserRepository _userRepository = UserRepository();
   final SeasonRepository _seasonRepository = SeasonRepository();
+  final SeasonService _seasonService = SeasonService();
   final TextEditingController _nameController = TextEditingController();
 
   Season? _season;
@@ -110,27 +112,7 @@ class _AdminSeasonSettingsPageState extends State<AdminSeasonSettingsPage> {
   Future<void> _closeSeason() async {
     if (_season == null) return;
     setState(() => _closing = true);
-
-    final users = await _userRepository.fetchAllUsers(orderBy: 'seasonPoints', descending: true);
-    final top = users.take(3).toList();
-    final winners = top.map(winnerFromUser).toList();
-
-    final closedSeason = _season!.copyWith(
-      isClosed: true,
-      winners: winners,
-    );
-    await _seasonRepository.closeSeason(closedSeason);
-
-    for (final user in users) {
-      final reset = user.copyWith(
-        seasonPoints: 0,
-        seasonCorrectPredictions: 0,
-        seasonWrongPredictions: 0,
-        seasonStreak: 0,
-        seasonAccuracy: 0,
-      );
-      await _userRepository.upsertUser(reset);
-    }
+    final closedSeason = await _seasonService.closeSeason(_season!);
 
     setState(() {
       _season = closedSeason;

@@ -68,4 +68,11 @@ class VoteRepository {
     if (user == null) return;
     await _votesCollection(matchId).doc(user.uid).delete();
   }
+
+  Future<void> deleteVotesForMatch(String matchId) async {
+    final snapshot = await _votesCollection(matchId).get();
+    for (final doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
+  }
 }

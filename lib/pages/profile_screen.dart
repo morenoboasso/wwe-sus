@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/user_model.dart';
+import '../models/season_model.dart';
+import '../repositories/season_repository.dart';
 import '../repositories/user_repository.dart';
 import '../routes/routes.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
+import 'dart:io';
+
+import '../services/imgbb_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -11,6 +17,8 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userRepository = UserRepository();
+    final seasonRepository = SeasonRepository();
+    final imgBBService = ImgBBService();
     final Stream<AppUser?> userStream = userRepository.watchCurrentUser();
 
     return Scaffold(
@@ -30,6 +38,7 @@ class ProfileScreen extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
+
                 final user = snapshot.data;
                 if (user == null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -48,6 +57,30 @@ class ProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         _Header(user: user),
+                        const SizedBox(height: 8),
+                        _EditProfileButton(
+                          user: user,
+                          userRepository: userRepository,
+                          imgBBService: imgBBService,
+                        ),
+                        const SizedBox(height: 10),
+                        FutureBuilder<Season?>(
+                          future: seasonRepository.fetchLatestOpenSeason(),
+                          builder: (context, seasonSnapshot) {
+                            if (seasonSnapshot.connectionState == ConnectionState.waiting) {
+                              return const SizedBox(height: 6);
+                            }
+                            final season = seasonSnapshot.data;
+                            final now = DateTime.now();
+                            final isActive = season != null &&
+                                !season.isClosed &&
+                                !now.isBefore(season.startAt) &&
+                                !now.isAfter(season.endAt);
+                            if (!isActive) return const SizedBox.shrink();
+
+                            return _SeasonBadge(seasonName: season.name.isNotEmpty ? season.name : 'Stagione attiva');
+                          },
+                        ),
                         const SizedBox(height: 16),
                         Container(
                           decoration: BoxDecoration(
@@ -119,6 +152,128 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _EditProfileButton extends StatelessWidget {
+  const _EditProfileButton({required this.user, required this.userRepository, required this.imgBBService});
+
+  final AppUser user;
+  final UserRepository userRepository;
+  final ImgBBService imgBBService;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () => _openDialog(context),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.white,
+        side: BorderSide(color: ColorsBets.whiteHD.withValues(alpha: 0.4)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      icon: const Icon(Icons.edit, size: 18),
+      label: const Text('Modifica profilo'),
+    );
+  }
+
+  void _openDialog(BuildContext context) {
+    final nameCtrl = TextEditingController(text: user.name);
+    final photoCtrl = TextEditingController(text: user.photo);
+    bool saving = false;
+    bool uploading = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.black87,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              title: const Text('Modifica profilo', style: TextStyle(color: Colors.white)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameCtrl,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Nome',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      filled: true,
+                      fillColor: Colors.white.withValues(alpha: 0.08),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: uploading
+                          ? null
+                          : () async {
+                              final picker = ImagePicker();
+                              final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 90);
+                              if (picked == null) return;
+
+                              final filePath = picked.path;
+                              setState(() => uploading = true);
+                              try {
+                                final url = await imgBBService.uploadImage(File(filePath));
+                                if (url != null) {
+                                  photoCtrl.text = url;
+                                }
+                              } finally {
+                                setState(() => uploading = false);
+                              }
+                            },
+                      icon: uploading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.cloud_upload, color: Colors.white),
+                      label: Text(
+                        uploading ? 'Caricamento...' : 'Carica foto profilo',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Seleziona dalla galleria, la foto viene caricata su ImgBB e applicata al profilo.',
+                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: saving ? null : () => Navigator.of(ctx).pop(),
+                  child: const Text('Annulla'),
+                ),
+                ElevatedButton(
+                  onPressed: saving
+                      ? null
+                      : () async {
+                          setState(() => saving = true);
+                          final updated = user.copyWith(
+                            name: nameCtrl.text.trim(),
+                            photo: photoCtrl.text.trim(),
+                          );
+                          await userRepository.upsertUser(updated);
+                          if (ctx.mounted) Navigator.of(ctx).pop();
+                        },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+                  child: Text(saving ? 'Salvataggio...' : 'Salva'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -245,6 +400,46 @@ class _StatTileData {
 
   final String label;
   final String value;
+}
+
+class _SeasonBadge extends StatelessWidget {
+  const _SeasonBadge({required this.seasonName});
+
+  final String seasonName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: ColorsBets.whiteHD.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.emoji_events, color: Colors.white, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            seasonName,
+            style: MemoText.thirdRowMatchInfo.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _StatTile extends StatelessWidget {
