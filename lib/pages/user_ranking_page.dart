@@ -37,7 +37,7 @@ class _CurrentSeasonTab extends StatelessWidget {
         }
         final season = seasonSnapshot.data;
         if (season == null) {
-          return const Center(child: Text('Nessuna stagione attiva'));
+          return const Center(child: Text('Nessuna stagione attiva',style: TextStyle(color: Colors.white),));
         }
 
         final now = DateTime.now();
@@ -101,7 +101,7 @@ class _CurrentSeasonTab extends StatelessWidget {
                   }
                   final users = snapshot.data ?? [];
                   if (users.isEmpty) {
-                    return const Center(child: Text('Nessun dato disponibile'));
+                    return const Center(child: Text('Nessun dato disponibile',style: TextStyle(color: Colors.white),));
                   }
 
                   return ListView.builder(
@@ -151,7 +151,7 @@ class _SeasonTab extends StatelessWidget {
         }
         final seasons = snapshot.data ?? [];
         if (seasons.isEmpty) {
-          return const Center(child: Text('Nessuna stagione conclusa'));
+          return const Center(child: Text('Nessuna stagione conclusa',style: TextStyle(color: Colors.white), ));
         }
 
         return ListView.builder(
