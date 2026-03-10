@@ -51,6 +51,7 @@ dependencies:
   croppy: ^1.1.2
   path_provider: ^2.1.2
   http: ^1.5.0
+  flutter_typeahead: ^4.3.0
 
 dev_dependencies:
   flutter_test:

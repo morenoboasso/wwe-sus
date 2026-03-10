@@ -8,10 +8,12 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/season_model.dart';
 import '../models/user_model.dart';
+import '../pages/admin_season_settings_page.dart';
 import '../repositories/season_repository.dart';
 import '../repositories/user_repository.dart';
 import '../routes/routes.dart';
 import '../services/imgbb_service.dart';
+import '../services/firebase/firebase_auth_service.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 
@@ -59,17 +61,9 @@ class ProfileScreen extends StatelessWidget {
             child: StreamBuilder<AppUser?>(
               stream: userStream,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
                 final user = snapshot.data;
-                if (user == null) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!context.mounted) return;
-                    Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
-                  });
-                  return const SizedBox.shrink();
+                if (snapshot.connectionState == ConnectionState.waiting || user == null) {
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 return DefaultTabController(
@@ -80,6 +74,57 @@ class ProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: PopupMenuButton<_ProfileAction>(
+                            icon: const Icon(Icons.more_vert, color: Colors.white),
+                            color: Colors.black87,
+                            elevation: 8,
+                            onSelected: (action) async {
+                              if (action == _ProfileAction.settings) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const AdminSeasonSettingsPage()),
+                                );
+                              } else if (action == _ProfileAction.logout) {
+                                await FirebaseAuthService().signOut();
+                                if (context.mounted) {
+                                  Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
+                                }
+                              }
+                            },
+                            itemBuilder: (ctx) {
+                              final items = <PopupMenuEntry<_ProfileAction>>[];
+                              if (user.role == AppUserRole.admin) {
+                                items.add(
+                                  const PopupMenuItem(
+                                    value: _ProfileAction.settings,
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.settings, color: Colors.white),
+                                        SizedBox(width: 8),
+                                        Text('Impostazioni stagione', style: TextStyle(color: Colors.white)),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                              items.add(
+                                const PopupMenuItem(
+                                  value: _ProfileAction.logout,
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.logout, color: Colors.white),
+                                      SizedBox(width: 8),
+                                      Text('Logout', style: TextStyle(color: Colors.white)),
+                                    ],
+                                  ),
+                                ),
+                              );
+                              return items;
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 4),
                         _Header(user: user),
                         const SizedBox(height: 8),
                         _EditProfileButton(
@@ -299,6 +344,11 @@ class _EditProfileButton extends StatelessWidget {
       },
     );
   }
+}
+
+enum _ProfileAction {
+  settings,
+  logout,
 }
 
 class _Header extends StatelessWidget {

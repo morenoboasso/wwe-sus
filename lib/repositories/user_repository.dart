@@ -56,6 +56,38 @@ class UserRepository {
     }, SetOptions(merge: true));
   }
 
+  /// Se esiste già un utente con [name] ma con uid diverso, migra i dati
+  /// sull'utente Firebase corrente e elimina il duplicato, evitando profili multipli.
+  Future<void> migrateUserByNameToCurrent(String name) async {
+    final firebaseUser = _auth.currentUser;
+    if (firebaseUser == null) return;
+
+    final existingSnapshot = await _usersCollection.where('name', isEqualTo: name).limit(1).get();
+    if (existingSnapshot.docs.isEmpty) return;
+
+    final existingDoc = existingSnapshot.docs.first;
+    if (existingDoc.id == firebaseUser.uid) return;
+
+    final data = existingDoc.data();
+    final newDocRef = _usersCollection.doc(firebaseUser.uid);
+
+    await _firestore.instance.runTransaction((tx) async {
+      final newDocSnap = await tx.get(newDocRef);
+      final merged = {
+        ...data,
+        'name': name,
+      };
+      if (newDocSnap.exists) {
+        final currentData = newDocSnap.data();
+        if (currentData != null) {
+          merged.addAll(currentData);
+        }
+      }
+      tx.set(newDocRef, merged, SetOptions(merge: true));
+      tx.delete(existingDoc.reference);
+    });
+  }
+
   Stream<AppUser?> watchUserById(String userId) {
     return _usersCollection.doc(userId).snapshots().map((doc) {
       final data = doc.data();

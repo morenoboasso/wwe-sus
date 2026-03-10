@@ -114,6 +114,7 @@ class _CurrentSeasonTab extends StatelessWidget {
                         totalUsers: users.length,
                         user: user,
                         valueLabel: _RankingPageState._seasonPointsLabel(user),
+                        onTap: () => _showUserStatsDialog(context, user),
                       );
                     },
                   );
@@ -388,6 +389,7 @@ class _RankingTab extends StatelessWidget {
                     totalUsers: users.length,
                     user: user,
                     valueLabel: labelBuilder(user),
+                    onTap: () => _showUserStatsDialog(context, user),
                   );
                 },
               );
@@ -404,12 +406,14 @@ class _RankingCard extends StatelessWidget {
     required this.totalUsers,
     required this.user,
     required this.valueLabel,
+    this.onTap,
   });
 
   final int position;
   final int totalUsers;
   final AppUser user;
   final String valueLabel;
+  final VoidCallback? onTap;
 
   String getPositionEmoji() {
     if (position == 0) return '🏆';
@@ -421,55 +425,271 @@ class _RankingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: ColorsBets.whiteHD.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: Text(
-              getPositionEmoji(),
-              style: const TextStyle(
-                fontSize: 28.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.0),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16.0),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: ColorsBets.whiteHD.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: Text(
+                getPositionEmoji(),
+                style: const TextStyle(
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
-          ),
-          CircleAvatar(
-            radius: 28.0,
-            backgroundColor: ColorsBets.whiteHD.withValues(alpha: 0.9),
-            backgroundImage: user.photo.isNotEmpty ? NetworkImage(user.photo) : null,
-            child: user.photo.isEmpty ? const Icon(Icons.person, color: ColorsBets.blackHD) : null,
-          ),
-          const SizedBox(width: 12.0),
-          Expanded(
+            CircleAvatar(
+              radius: 28.0,
+              backgroundColor: ColorsBets.whiteHD.withValues(alpha: 0.9),
+              backgroundImage: user.photo.isNotEmpty ? NetworkImage(user.photo) : null,
+              child: user.photo.isEmpty ? const Icon(Icons.person, color: ColorsBets.blackHD) : null,
+            ),
+            const SizedBox(width: 12.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.name,
+                    style: const TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    valueLabel,
+                    style: const TextStyle(
+                      fontSize: 14.0,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+void _showUserStatsDialog(BuildContext context, AppUser user) {
+  showDialog(
+    context: context,
+    builder: (ctx) {
+      return AlertDialog(
+        backgroundColor: Colors.black.withValues(alpha: 0.92),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+        contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 26,
+              backgroundColor: ColorsBets.whiteHD,
+              backgroundImage: user.photo.isNotEmpty ? NetworkImage(user.photo) : null,
+              child: user.photo.isEmpty ? const Icon(Icons.person, color: ColorsBets.blackHD, size: 26) : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    user.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    'Globale & stagione',
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 440,
+          child: DefaultTabController(
+            length: 2,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  user.name,
-                  style: const TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                Container(
+                  decoration: BoxDecoration(
+                    color: ColorsBets.whiteHD.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: 0.18)),
+                  ),
+                  child: const TabBar(
+                    indicatorColor: Colors.white,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white70,
+                    tabs: [
+                      Tab(text: 'Stagione'),
+                      Tab(text: 'Globale'),
+                    ],
                   ),
                 ),
-                Text(
-                  valueLabel,
-                  style: const TextStyle(
-                    fontSize: 14.0,
-                    color: Colors.white70,
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 320,
+                  child: TabBarView(
+                    children: [
+                      SingleChildScrollView(
+                        child: _StatsDialogSection(
+                          title: 'Stagione',
+                          isSeason: true,
+                          tiles: [
+                            _StatDialogTileData(label: 'Punti', value: '${user.seasonPoints}'),
+                            _StatDialogTileData(label: 'Streak', value: '${user.seasonStreak}'),
+                            _StatDialogTileData(
+                              label: 'Accuracy',
+                              value: '${(user.seasonAccuracy * 100).toStringAsFixed(1)}%',
+                            ),
+                            _StatDialogTileData(label: 'Corretti', value: '${user.seasonCorrectPredictions}'),
+                            _StatDialogTileData(label: 'Sbagliati', value: '${user.seasonWrongPredictions}'),
+                          ],
+                        ),
+                      ),
+                      SingleChildScrollView(
+                        child: _StatsDialogSection(
+                          title: 'Globale',
+                          isSeason: false,
+                          tiles: [
+                            _StatDialogTileData(label: 'Punti', value: '${user.points}'),
+                            _StatDialogTileData(label: 'Streak', value: '${user.streak}'),
+                            _StatDialogTileData(
+                              label: 'Accuracy',
+                              value: '${(user.accuracy * 100).toStringAsFixed(1)}%',
+                            ),
+                            _StatDialogTileData(label: 'Corretti', value: '${user.correctPredictions}'),
+                            _StatDialogTileData(label: 'Sbagliati', value: '${user.wrongPredictions}'),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _StatsDialogSection extends StatelessWidget {
+  const _StatsDialogSection({required this.title, required this.tiles, required this.isSeason});
+
+  final String title;
+  final List<_StatDialogTileData> tiles;
+  final bool isSeason;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.14 : 0.10);
+    final border = ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.26 : 0.18);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+          ),
+          const SizedBox(height: 10),
+          _StatDialogTile(tile: tiles[0], isWide: true, isSeason: isSeason),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _StatDialogTile(tile: tiles[1], isSeason: isSeason)),
+              const SizedBox(width: 10),
+              Expanded(child: _StatDialogTile(tile: tiles[2], isSeason: isSeason)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _StatDialogTile(tile: tiles[3], isSeason: isSeason)),
+              const SizedBox(width: 10),
+              Expanded(child: _StatDialogTile(tile: tiles[4], isSeason: isSeason)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatDialogTileData {
+  const _StatDialogTileData({required this.label, required this.value});
+
+  final String label;
+  final String value;
+}
+
+class _StatDialogTile extends StatelessWidget {
+  const _StatDialogTile({required this.tile, required this.isSeason, this.isWide = false});
+
+  final _StatDialogTileData tile;
+  final bool isSeason;
+  final bool isWide;
+
+  @override
+  Widget build(BuildContext context) {
+    final tileColor = ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.10 : 0.08);
+    final border = ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.22 : 0.16);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: tileColor,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        crossAxisAlignment: isWide ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        children: [
+          Text(
+            tile.label,
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.72), fontWeight: FontWeight.w600),
+            textAlign: isWide ? TextAlign.center : TextAlign.left,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            tile.value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: isWide ? 26 : 16,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: isWide ? TextAlign.center : TextAlign.left,
           ),
         ],
       ),

@@ -25,6 +25,16 @@ class DbService {
     }
   }
 
+  Future<List<String>> fetchUserNames() async {
+    try {
+      final snapshot = await _firestore.collection('users').get();
+      return snapshot.docs.map((d) => (d['name'] as String?) ?? '').where((n) => n.isNotEmpty).toList();
+    } catch (e) {
+      debugPrint('Error fetching usernames: $e');
+      return [];
+    }
+  }
+
   Future<void> createMatchCard(String title, String type, List<String> wrestlers) async {
     try {
       final matchDoc = await _firestore.collection('matchCards').add({

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:wwe_bets/pages/user_ranking_page.dart';
-import '../pages/admin_season_settings_page.dart';
 import '../pages/create_match_card_page.dart';
 import '../pages/match_card_list_page.dart';
 import '../pages/profile_screen.dart';
@@ -19,7 +18,6 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
     const MatchCardListPage(),
     const CreateMatchCardPage(),
     const RankingPage(),
-    const AdminSeasonSettingsPage(),
     const ProfileScreen(),
   ];
 
@@ -35,34 +33,36 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
       extendBody: true,
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.only(bottom: 10.0, left: 45, right: 45, top: 5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: ColorsBets.whiteHD,
-            borderRadius: BorderRadius.circular(7.0),
-            border: Border.all(color: ColorsBets.whiteHD, width: 1.8),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(7.0),
-            child: BottomNavigationBar(
-              elevation: 0,
-              iconSize: 24,
-              selectedIconTheme: const IconThemeData(size: 28),
-              unselectedIconTheme: const IconThemeData(size: 24),
-              items: <BottomNavigationBarItem>[
-                _buildNavigationBarItem(Icons.how_to_vote, 'Match', 0),
-                _buildNavigationBarItem(Icons.add_box, 'Crea', 1),
-                _buildNavigationBarItem(Icons.leaderboard, 'Classifica', 2),
-                _buildNavigationBarItem(Icons.settings, 'Stagione', 3),
-                _buildNavigationBarItem(Icons.person, 'Profilo', 4),
-              ],
-              currentIndex: _selectedIndex,
-              selectedItemColor: ColorsBets.blackHD,
-              unselectedItemColor: ColorsBets.blackHD.withValues(alpha: 0.4),
-              showSelectedLabels: true,
-              showUnselectedLabels: false,
-              onTap: _onItemTapped,
-              backgroundColor: ColorsBets.whiteHD,
+        bottom: true,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(45, 12, 45, 20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: ColorsBets.whiteHD,
+              borderRadius: BorderRadius.circular(7.0),
+              border: Border.all(color: ColorsBets.whiteHD, width: 1.8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(7.0),
+              child: BottomNavigationBar(
+                elevation: 0,
+                iconSize: 24,
+                selectedIconTheme: const IconThemeData(size: 28),
+                unselectedIconTheme: const IconThemeData(size: 24),
+                items: <BottomNavigationBarItem>[
+                  _buildNavigationBarItem(Icons.how_to_vote, 'Match', 0),
+                  _buildNavigationBarItem(Icons.add_box, 'Crea', 1),
+                  _buildNavigationBarItem(Icons.leaderboard, 'Classifica', 2),
+                  _buildNavigationBarItem(Icons.person, 'Profilo', 3),
+                ],
+                currentIndex: _selectedIndex,
+                selectedItemColor: ColorsBets.blackHD,
+                unselectedItemColor: ColorsBets.blackHD.withValues(alpha: 0.4),
+                showSelectedLabels: true,
+                showUnselectedLabels: false,
+                onTap: _onItemTapped,
+                backgroundColor: ColorsBets.whiteHD,
+              ),
             ),
           ),
         ),

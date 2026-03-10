@@ -5,17 +5,35 @@ class CreateMatchCardPageState extends State<CreateMatchCardPage> {
   final TextEditingController _typeController = TextEditingController();
   final TextEditingController _ppvController = TextEditingController();
   final CreateMatchController _controller = CreateMatchController();
+  final List<TextEditingController> _wrestlerControllers = [];
 
   bool _isTitleMatch = false;
   bool _isMainEvent = false;
   PredictionType _predictionType = PredictionType.standard;
   List<String> _wrestlers = ['', ''];
   bool _isLoading = false;
+  List<String> _ppvSuggestions = [];
+  bool _ppvSuggestionsLoaded = false;
+  bool _ppvSuggestionsLoading = false;
+  List<String> _rosterSuggestions = [];
+  bool _rosterSuggestionsLoaded = false;
+  bool _rosterSuggestionsLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncWrestlerControllers();
+    _loadPpvSuggestions();
+    _loadRosterSuggestions();
+  }
 
   @override
   void dispose() {
     _typeController.dispose();
     _ppvController.dispose();
+    for (final controller in _wrestlerControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -26,8 +44,111 @@ class CreateMatchCardPageState extends State<CreateMatchCardPage> {
         wrestlers: _wrestlers,
       );
 
+  Future<void> _loadPpvSuggestions() async {
+    if (_ppvSuggestionsLoading || _ppvSuggestionsLoaded) return;
+    setState(() {
+      _ppvSuggestionsLoading = true;
+    });
+    try {
+      final suggestions = await _controller.fetchPpvSuggestions();
+      if (!mounted) return;
+      setState(() {
+        _ppvSuggestions = suggestions;
+        _ppvSuggestionsLoaded = true;
+        _ppvSuggestionsLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _ppvSuggestionsLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadRosterSuggestions() async {
+    if (_rosterSuggestionsLoading || _rosterSuggestionsLoaded) return;
+    setState(() {
+      _rosterSuggestionsLoading = true;
+    });
+    try {
+      final suggestions = await _controller.fetchRosterSuggestions();
+      if (!mounted) return;
+      setState(() {
+        _rosterSuggestions = suggestions;
+        _rosterSuggestionsLoaded = true;
+        _rosterSuggestionsLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _rosterSuggestionsLoading = false;
+      });
+    }
+  }
+
+  Future<List<String>> _getPpvSuggestions(String pattern) async {
+    if (!_ppvSuggestionsLoaded) {
+      await _loadPpvSuggestions();
+    }
+    final query = pattern.trim().toLowerCase();
+    if (query.isEmpty) {
+      return [];
+    }
+    final filtered = _ppvSuggestions.where((ppv) {
+      return ppv.toLowerCase().contains(query);
+    }).toList();
+    if (filtered.length > 6) {
+      return filtered.sublist(0, 6);
+    }
+    return filtered;
+  }
+
+  Future<List<String>> _getWrestlerSuggestions(String pattern) async {
+    if (!_rosterSuggestionsLoaded) {
+      await _loadRosterSuggestions();
+    }
+    final query = pattern.trim().toLowerCase();
+    if (query.isEmpty) {
+      return [];
+    }
+    final filtered = _rosterSuggestions.where((name) {
+      return name.toLowerCase().contains(query);
+    }).toList();
+    if (filtered.length > 8) {
+      return filtered.sublist(0, 8);
+    }
+    return filtered;
+  }
+
+  SuggestionsBoxDecoration _suggestionsDecoration(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final available = media.size.height - media.viewInsets.bottom - 200;
+    final maxHeight = available.clamp(120.0, media.size.height * 0.5);
+    return SuggestionsBoxDecoration(
+      color: Colors.white,
+      elevation: 6,
+      constraints: BoxConstraints(maxHeight: maxHeight.toDouble()),
+    );
+  }
+
+  void _syncWrestlerControllers() {
+    if (_wrestlerControllers.length < _wrestlers.length) {
+      for (var i = _wrestlerControllers.length; i < _wrestlers.length; i++) {
+        _wrestlerControllers.add(TextEditingController(text: _wrestlers[i]));
+      }
+      return;
+    }
+    if (_wrestlerControllers.length > _wrestlers.length) {
+      for (var i = _wrestlerControllers.length - 1; i >= _wrestlers.length; i--) {
+        _wrestlerControllers[i].dispose();
+        _wrestlerControllers.removeAt(i);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final suggestionsDecoration = _suggestionsDecoration(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -89,10 +210,38 @@ class CreateMatchCardPageState extends State<CreateMatchCardPage> {
                     const SizedBox(height: 22),
                     Text('PPV*', style: MemoText.createInputMainText),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _ppvController,
-                      decoration: InputDecorations.standard('Inserisci il nome del PPV...'),
-                      onChanged: (_) => setState(() {}),
+                    TypeAheadFormField<String>(
+                      textFieldConfiguration: TextFieldConfiguration(
+                        controller: _ppvController,
+                        decoration: InputDecorations.standard('Inserisci il nome del PPV...'),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      suggestionsCallback: (pattern) => _getPpvSuggestions(pattern),
+                      suggestionsBoxDecoration: suggestionsDecoration,
+                      direction: AxisDirection.down,
+                      autoFlipDirection: true,
+                      autoFlipListDirection: true,
+                      autoFlipMinHeight: 80,
+                      minCharsForSuggestions: 1,
+                      loadingBuilder: (context) => const Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                      hideOnEmpty: true,
+                      hideOnLoading: true,
+                      hideOnError: true,
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          title: Text(
+                            suggestion,
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                        );
+                      },
+                      onSuggestionSelected: (suggestion) {
+                        _ppvController.text = suggestion;
+                        setState(() {});
+                      },
                     ),
                     const SizedBox(height: 22),
                     TitleCheckbox(
@@ -179,10 +328,16 @@ class CreateMatchCardPageState extends State<CreateMatchCardPage> {
                             child: WrestlerInputRow(
                               index1: index1,
                               index2: index2,
+                              controller1: _wrestlerControllers[index1],
+                              controller2: index2 < _wrestlerControllers.length
+                                  ? _wrestlerControllers[index2]
+                                  : null,
                               wrestlers: _wrestlers,
                               onWrestlerChanged: _onWrestlerChanged,
                               onRemoveWrestler: _removeWrestler,
                               addWrestlerCallback: _addWrestler,
+                              suggestionsCallback: _getWrestlerSuggestions,
+                              suggestionsBoxDecoration: suggestionsDecoration,
                               canAddWrestler: _wrestlers.length < 20 &&
                                   rowIndex == (_wrestlers.length / 2).ceil() - 1,
                             ),
@@ -204,6 +359,7 @@ class CreateMatchCardPageState extends State<CreateMatchCardPage> {
   void _addWrestler() {
     setState(() {
       _wrestlers = [..._wrestlers, ''];
+      _wrestlerControllers.add(TextEditingController());
     });
   }
 
@@ -214,6 +370,10 @@ class CreateMatchCardPageState extends State<CreateMatchCardPage> {
     }
     setState(() {
       _wrestlers = [..._wrestlers]..removeAt(index);
+      if (index < _wrestlerControllers.length) {
+        _wrestlerControllers[index].dispose();
+        _wrestlerControllers.removeAt(index);
+      }
     });
   }
 

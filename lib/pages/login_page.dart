@@ -19,6 +19,10 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  String? _errorMessage;
+  String _userName = '';
+  List<String> _cachedUserNames = [];
+  bool _hasLoadedNames = false;
 
   @override
   void initState() {
@@ -104,14 +108,21 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         Expanded(
                           child: LoginTextField(
                             onChanged: (value) {
-                              userName = value.trim();
+                              _userName = value.trim();
+                            },
+                            onSuggestionsRequested: () async {
+                              if (!_hasLoadedNames) {
+                                _cachedUserNames = await dbService.fetchUserNames();
+                                _hasLoadedNames = true;
+                              }
+                              return _cachedUserNames;
                             },
                           ),
                         ),
                         const SizedBox(width: 5),
                         ElevatedButton(
                           onPressed: () async {
-                            await _handleLogin(userName, dbService);
+                            await _handleLogin(_userName, dbService);
                           },
                           style: ElevatedButton.styleFrom(
                             shape: const CircleBorder(),
@@ -129,7 +140,46 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 16),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: _errorMessage == null
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                          child: Container(
+                            key: ValueKey(_errorMessage),
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.22),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.redAccent.withValues(alpha: 0.6), width: 1.2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.redAccent.withValues(alpha: 0.25),
+                                  blurRadius: 18,
+                                  spreadRadius: 1,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.error_outline, color: Colors.white),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _errorMessage!,
+                                    style: MemoText.thirdRowMatchInfo.copyWith(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -146,21 +196,16 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     bool nameExists = await dbService.checkUserNameExists(userName);
     if (mounted) {
       if (nameExists) {
+        setState(() => _errorMessage = null);
+        await userRepository.migrateUserByNameToCurrent(userName);
         await userRepository.ensureCurrentUserProfile(name: userName);
         Get.offNamed(AppRoutes.mainScreen);
         GetStorage().write('userName', userName);
       } else {
         Vibration.vibrate(duration: 200, amplitude: 128);
-        Get.snackbar(
-          'Accesso Fallito',
-          'Sei così stupido che non sai il tuo nome?',
-          icon: const Icon(
-            Icons.error_sharp,
-            color: Colors.white,
-          ),
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        setState(() {
+          _errorMessage = 'Nome non trovato. Controlla e riprova.';
+        });
       }
     }
   }
