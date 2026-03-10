@@ -1,15 +1,39 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
+import 'package:croppy/croppy.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../models/user_model.dart';
+import 'package:path_provider/path_provider.dart';
+
 import '../models/season_model.dart';
+import '../models/user_model.dart';
 import '../repositories/season_repository.dart';
 import '../repositories/user_repository.dart';
 import '../routes/routes.dart';
+import '../services/imgbb_service.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
-import 'dart:io';
 
-import '../services/imgbb_service.dart';
+Future<File?> cropImageToCircle(BuildContext context, File sourceFile) async {
+  final result = await showMaterialImageCropper(
+    context,
+    imageProvider: FileImage(sourceFile),
+    cropPathFn: ellipseCropShapeFn,
+    allowedAspectRatios: const [CropAspectRatio(width: 1, height: 1)],
+    shouldPopAfterCrop: true,
+  );
+
+  if (result == null) return null;
+
+  final byteData = await result.uiImage.toByteData(format: ui.ImageByteFormat.png);
+  if (byteData == null) return null;
+
+  final tempDir = await getTemporaryDirectory();
+  final output = File('${tempDir.path}/profile_${DateTime.now().millisecondsSinceEpoch}.png');
+  await output.writeAsBytes(byteData.buffer.asUint8List());
+  return output;
+}
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -18,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userRepository = UserRepository();
     final seasonRepository = SeasonRepository();
-    final imgBBService = ImgBBService();
+    const imgBBService = ImgBBService();
     final Stream<AppUser?> userStream = userRepository.watchCurrentUser();
 
     return Scaffold(
@@ -154,6 +178,7 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class _EditProfileButton extends StatelessWidget {
@@ -200,7 +225,7 @@ class _EditProfileButton extends StatelessWidget {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       labelText: 'Nome',
-                      labelStyle: TextStyle(color: Colors.white70),
+                      labelStyle: const TextStyle(color: Colors.white70),
                       filled: true,
                       fillColor: Colors.white.withValues(alpha: 0.08),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -208,7 +233,7 @@ class _EditProfileButton extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Align(
-                    alignment: Alignment.centerLeft,
+                    alignment: Alignment.center,
                     child: TextButton.icon(
                       onPressed: uploading
                           ? null
@@ -217,10 +242,17 @@ class _EditProfileButton extends StatelessWidget {
                               final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 90);
                               if (picked == null) return;
 
-                              final filePath = picked.path;
+                              if (!ctx.mounted) return;
+
+                              final sourceFile = File(picked.path);
+
+                              final croppedFile = await cropImageToCircle(ctx, sourceFile);
+                              if (croppedFile == null) return;
+
+                              if (!ctx.mounted) return;
                               setState(() => uploading = true);
                               try {
-                                final url = await imgBBService.uploadImage(File(filePath));
+                                final url = await imgBBService.uploadImage(croppedFile);
                                 if (url != null) {
                                   photoCtrl.text = url;
                                 }
@@ -242,18 +274,9 @@ class _EditProfileButton extends StatelessWidget {
                       style: TextButton.styleFrom(foregroundColor: Colors.white),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Seleziona dalla galleria, la foto viene caricata su ImgBB e applicata al profilo.',
-                    style: TextStyle(color: Colors.white54, fontSize: 12),
-                  ),
                 ],
               ),
               actions: [
-                TextButton(
-                  onPressed: saving ? null : () => Navigator.of(ctx).pop(),
-                  child: const Text('Annulla'),
-                ),
                 ElevatedButton(
                   onPressed: saving
                       ? null

@@ -48,6 +48,8 @@ dependencies:
   riverpod: ^3.2.1
   flutter_riverpod: ^3.2.1
   image_picker: ^1.0.7
+  croppy: ^1.1.2
+  path_provider: ^2.1.2
   http: ^1.5.0
 
 dev_dependencies:
