@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'dart:async';
+
 import '../models/match_model.dart';
 import '../repositories/match_repository.dart';
+import '../services/ai_vote_service.dart';
 import '../services/firebase/firebase_auth_service.dart';
 import '../services/roster_service.dart';
 
@@ -10,13 +13,16 @@ class CreateMatchController {
     MatchRepository? matchRepository,
     FirebaseAuthService? authService,
     RosterService? rosterService,
+    AiVoteService? aiVoteService,
   })  : _matchRepository = matchRepository ?? MatchRepository(),
         _authService = authService ?? FirebaseAuthService(),
-        _rosterService = rosterService ?? RosterService();
+        _rosterService = rosterService ?? RosterService(),
+        _aiVoteService = aiVoteService ?? AiVoteService();
 
   final MatchRepository _matchRepository;
   final FirebaseAuthService _authService;
   final RosterService _rosterService;
+  final AiVoteService _aiVoteService;
   List<String>? _rosterCache;
 
   bool canSubmit({
@@ -76,7 +82,7 @@ class CreateMatchController {
   }
 
 
-  Future<void> createMatch({
+  Future<String> createMatch({
     required String type,
     required String ppvName,
     required bool isTitleMatch,
@@ -106,6 +112,18 @@ class CreateMatchController {
           : <String>[],
     };
 
-    await _matchRepository.createMatchWithData(matchData);
+    final matchId = await _matchRepository.createMatchWithData(matchData);
+
+    unawaited(_aiVoteService.submitAiVote(
+      matchId: matchId,
+      type: type.trim(),
+      ppvName: ppvName.trim(),
+      predictionType: predictionType,
+      wrestlers: normalizedWrestlers,
+      isTitleMatch: isTitleMatch,
+      isMainEvent: isMainEvent,
+    ));
+
+    return matchId;
   }
 }

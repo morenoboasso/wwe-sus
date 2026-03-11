@@ -63,6 +63,13 @@ class VoteRepository {
     await docRef.set(data, SetOptions(merge: true));
   }
 
+  Future<void> submitVoteForUser(String matchId, String userId, Map<String, dynamic> data) async {
+    final docRef = _votesCollection(matchId).doc(userId);
+    final existing = await docRef.get();
+    if (existing.exists) return;
+    await docRef.set(data, SetOptions(merge: true));
+  }
+
   Future<void> deleteVote(String matchId) async {
     final user = _auth.currentUser;
     if (user == null) return;

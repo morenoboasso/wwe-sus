@@ -54,8 +54,9 @@ class MatchRepository {
     await _collection.doc(match.id).set(match.toMap());
   }
 
-  Future<void> createMatchWithData(Map<String, dynamic> data) async {
-    await _collection.add(data);
+  Future<String> createMatchWithData(Map<String, dynamic> data) async {
+    final doc = await _collection.add(data);
+    return doc.id;
   }
 
   Future<void> updateMatch(String matchId, Map<String, dynamic> data) async {

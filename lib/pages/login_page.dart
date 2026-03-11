@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:vibration/vibration.dart';
 import 'package:wwe_bets/routes/routes.dart';
 import 'package:wwe_bets/style/color_style.dart';
 import 'package:wwe_bets/style/text_style.dart';
 import 'package:wwe_bets/widgets/login/login_input.dart';
 import 'package:wwe_bets/services/db_service.dart';
 import '../repositories/user_repository.dart';
+import '../services/firebase/firebase_auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -189,24 +189,40 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   }
 
   Future<void> _handleLogin(String userName, DbService dbService) async {
-    if (userName.isNotEmpty) {
-      userName = userName[0].toUpperCase() + userName.substring(1);
+    userName = userName.trim();
+    if (userName.isEmpty) {
+      if (!mounted) return;
+      setState(() => _errorMessage = 'Inserisci un nome valido.');
+      return;
+    }
+    userName = userName[0].toUpperCase() + userName.substring(1);
+    try {
+      await FirebaseAuthService().ensureSignedIn();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _errorMessage = 'Errore di connessione. Riprova.');
+      return;
     }
     final userRepository = UserRepository();
-    bool nameExists = await dbService.checkUserNameExists(userName);
-    if (mounted) {
+    final nameExists = await dbService.checkUserNameExists(userName);
+    if (!mounted) return;
+    try {
+      setState(() => _errorMessage = null);
       if (nameExists) {
-        setState(() => _errorMessage = null);
-        await userRepository.migrateUserByNameToCurrent(userName);
-        await userRepository.ensureCurrentUserProfile(name: userName);
-        Get.offNamed(AppRoutes.mainScreen);
-        GetStorage().write('userName', userName);
-      } else {
-        Vibration.vibrate(duration: 200, amplitude: 128);
-        setState(() {
-          _errorMessage = 'Nome non trovato. Controlla e riprova.';
-        });
+        try {
+          await userRepository.migrateUserByNameToCurrent(userName);
+        } catch (_) {
+          // Ignore migration errors and continue with local profile creation.
+        }
       }
+      await userRepository.ensureCurrentUserProfile(name: userName);
+      Get.offNamed(AppRoutes.mainScreen);
+      GetStorage().write('userName', userName);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'Errore di connessione. Riprova.';
+      });
     }
   }
 }

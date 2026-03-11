@@ -16,6 +16,7 @@ import '../services/imgbb_service.dart';
 import '../services/firebase/firebase_auth_service.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
+import '../widgets/common/app_shimmer.dart';
 
 Future<File?> cropImageToCircle(BuildContext context, File sourceFile) async {
   final result = await showMaterialImageCropper(
@@ -137,7 +138,7 @@ class ProfileScreen extends StatelessWidget {
                           future: seasonRepository.fetchLatestOpenSeason(),
                           builder: (context, seasonSnapshot) {
                             if (seasonSnapshot.connectionState == ConnectionState.waiting) {
-                              return const SizedBox(height: 6);
+                              return const _SeasonBadgeShimmer();
                             }
                             final season = seasonSnapshot.data;
                             final now = DateTime.now();
@@ -342,6 +343,46 @@ class _EditProfileButton extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _SeasonBadgeShimmer extends StatelessWidget {
+  const _SeasonBadgeShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppShimmer(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: ColorsBets.whiteHD.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.4),
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 140,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.32),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

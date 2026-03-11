@@ -23,6 +23,17 @@ subprojects {
     project.evaluationDependsOn(':app')
 }
 
+// Fix for AGP namespace requirement in transitive libs (e.g., flutter_keyboard_visibility)
+subprojects { project ->
+    if (project.name == 'flutter_keyboard_visibility') {
+        project.pluginManager.withPlugin("com.android.library") {
+            if (project.hasProperty('android')) {
+                project.android.namespace = 'com.jrai.flutter_keyboard_visibility'
+            }
+        }
+    }
+}
+
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }

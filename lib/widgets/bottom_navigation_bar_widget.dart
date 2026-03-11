@@ -38,14 +38,15 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
           padding: const EdgeInsets.fromLTRB(45, 12, 45, 20),
           child: Container(
             decoration: BoxDecoration(
-              color: ColorsBets.whiteHD,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(7.0),
-              border: Border.all(color: ColorsBets.whiteHD, width: 1.8),
+              border: Border.all(color: Colors.white, width: 1.8),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(7.0),
               child: BottomNavigationBar(
                 elevation: 0,
+                type: BottomNavigationBarType.fixed,
                 iconSize: 24,
                 selectedIconTheme: const IconThemeData(size: 28),
                 unselectedIconTheme: const IconThemeData(size: 24),
@@ -61,7 +62,7 @@ class BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
                 showSelectedLabels: true,
                 showUnselectedLabels: false,
                 onTap: _onItemTapped,
-                backgroundColor: ColorsBets.whiteHD,
+                backgroundColor: Colors.white,
               ),
             ),
           ),

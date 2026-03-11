@@ -405,6 +405,7 @@ class CreateMatchCardPageState extends State<CreateMatchCardPage> {
 
       if (!mounted) return;
       _showSuccessSnackbar('Match creato con successo!');
+      await Future.delayed(const Duration(milliseconds: 500));
       navigator.pushReplacement(
         MaterialPageRoute(
           builder: (context) => const BottomNavigationBarWidget(),

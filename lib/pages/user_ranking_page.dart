@@ -4,6 +4,7 @@ import '../models/season_model.dart';
 import '../repositories/user_repository.dart';
 import '../repositories/season_repository.dart';
 import '../style/color_style.dart';
+import '../widgets/common/app_shimmer.dart';
 
 class RankingPage extends StatefulWidget {
   const RankingPage({super.key});
@@ -12,13 +13,213 @@ class RankingPage extends StatefulWidget {
   State<RankingPage> createState() => _RankingPageState();
 }
 
+class _CurrentSeasonHeaderShimmer extends StatelessWidget {
+  const _CurrentSeasonHeaderShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: AppShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 210,
+              height: 20,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 260,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              width: 200,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RankingListShimmer extends StatelessWidget {
+  const _RankingListShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: AppShimmer(
+            child: Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: ColorsBets.whiteHD.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: _shimmerBar(width: 32, height: 28, radius: 6),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 2),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.18),
+                          Colors.white.withValues(alpha: 0.05),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 28.0,
+                      backgroundColor: Colors.white.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  const SizedBox(width: 12.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _shimmerBar(width: 160, height: 14),
+                        const SizedBox(height: 6),
+                        _shimmerBar(width: 120, height: 12),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _shimmerBar({required double width, required double height, double radius = 8}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.20),
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+}
+
+class _SeasonCardsShimmer extends StatelessWidget {
+  const _SeasonCardsShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: AppShimmer(
+            child: Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: ColorsBets.whiteHD.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: ColorsBets.whiteHD.withValues(alpha: 0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _shimmerBar(width: 140, height: 16),
+                      _shimmerBar(width: 70, height: 14),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  _shimmerBar(width: 200, height: 12),
+                  const SizedBox(height: 6),
+                  _shimmerBar(width: 180, height: 12),
+                  const SizedBox(height: 12),
+                  _shimmerBar(width: 160, height: 12),
+                  const SizedBox(height: 6),
+                  _shimmerBar(width: 140, height: 12),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _shimmerBar({required double width, required double height}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
+  }
+}
+
 class _CurrentSeasonTab extends StatelessWidget {
   const _CurrentSeasonTab();
 
-  String _formatDate(DateTime date) {
+  String _formatStartDate(DateTime date) {
     final local = date.toLocal();
+    const months = [
+      'gennaio',
+      'febbraio',
+      'marzo',
+      'aprile',
+      'maggio',
+      'giugno',
+      'luglio',
+      'agosto',
+      'settembre',
+      'ottobre',
+      'novembre',
+      'dicembre',
+    ];
     String two(int v) => v.toString().padLeft(2, '0');
-    return '${two(local.day)}/${two(local.month)}/${local.year} ${two(local.hour)}:${two(local.minute)}';
+    return '${local.day} ${months[local.month - 1]} ${local.year} - ${two(local.hour)}:${two(local.minute)}';
+  }
+
+  String _remainingDaysLabel(DateTime endAt) {
+    final diff = endAt.toLocal().difference(DateTime.now());
+    if (diff.isNegative) return 'Terminata';
+    final days = (diff.inSeconds / 86400).ceil();
+    if (days <= 1) return '1 giorno alla fine';
+    return '$days giorni alla fine';
   }
 
   @override
@@ -30,7 +231,7 @@ class _CurrentSeasonTab extends StatelessWidget {
       future: seasonRepository.fetchLatestOpenSeason(),
       builder: (context, seasonSnapshot) {
         if (seasonSnapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const _CurrentSeasonHeaderShimmer();
         }
         if (seasonSnapshot.hasError) {
           return Center(child: Text('Errore: ${seasonSnapshot.error}'));
@@ -61,11 +262,11 @@ class _CurrentSeasonTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Inizio: ${_formatDate(season.startAt)}',
+                    'Inizio: ${_formatStartDate(season.startAt)}',
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                   Text(
-                    'Fine:   ${_formatDate(season.endAt)}',
+                    'Fine:   ${_remainingDaysLabel(season.endAt)}',
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                   if (notStarted)
@@ -94,7 +295,7 @@ class _CurrentSeasonTab extends StatelessWidget {
                 future: userRepository.fetchAllUsers(orderBy: 'seasonPoints', descending: true),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const _RankingListShimmer();
                   }
                   if (snapshot.hasError) {
                     return Center(child: Text('Errore: ${snapshot.error}'));
@@ -145,7 +346,7 @@ class _SeasonTab extends StatelessWidget {
       future: seasonRepository.fetchSeasons(onlyClosed: true),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const _SeasonCardsShimmer();
         }
         if (snapshot.hasError) {
           return Center(child: Text('Errore: ${snapshot.error}'));
@@ -370,7 +571,7 @@ class _RankingTab extends StatelessWidget {
             future: userRepository.fetchAllUsers(orderBy: orderBy, descending: true),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return const _RankingListShimmer();
               }
               if (snapshot.hasError) {
                 return Center(child: Text('Errore: ${snapshot.error}'));
@@ -449,11 +650,33 @@ class _RankingCard extends StatelessWidget {
                 ),
               ),
             ),
-            CircleAvatar(
-              radius: 28.0,
-              backgroundColor: ColorsBets.whiteHD.withValues(alpha: 0.9),
-              backgroundImage: user.photo.isNotEmpty ? NetworkImage(user.photo) : null,
-              child: user.photo.isEmpty ? const Icon(Icons.person, color: ColorsBets.blackHD) : null,
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ],
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.18),
+                    Colors.white.withValues(alpha: 0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: CircleAvatar(
+                radius: 28.0,
+                backgroundColor: ColorsBets.whiteHD,
+                backgroundImage: user.photo.isNotEmpty ? NetworkImage(user.photo) : null,
+                child: user.photo.isEmpty ? const Icon(Icons.person, color: ColorsBets.blackHD) : null,
+              ),
             ),
             const SizedBox(width: 12.0),
             Expanded(
@@ -497,11 +720,33 @@ void _showUserStatsDialog(BuildContext context, AppUser user) {
         contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 26,
-              backgroundColor: ColorsBets.whiteHD,
-              backgroundImage: user.photo.isNotEmpty ? NetworkImage(user.photo) : null,
-              child: user.photo.isEmpty ? const Icon(Icons.person, color: ColorsBets.blackHD, size: 26) : null,
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ],
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.18),
+                    Colors.white.withValues(alpha: 0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: CircleAvatar(
+                radius: 26,
+                backgroundColor: ColorsBets.whiteHD,
+                backgroundImage: user.photo.isNotEmpty ? NetworkImage(user.photo) : null,
+                child: user.photo.isEmpty ? const Icon(Icons.person, color: ColorsBets.blackHD, size: 26) : null,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -667,6 +912,7 @@ class _StatDialogTile extends StatelessWidget {
     final tileColor = ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.10 : 0.08);
     final border = ColorsBets.whiteHD.withValues(alpha: isSeason ? 0.22 : 0.16);
     return Container(
+      width: isWide ? double.infinity : null,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: tileColor,

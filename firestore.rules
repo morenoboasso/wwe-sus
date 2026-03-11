@@ -3,7 +3,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Helper function to check if user is admin
     function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Helper function to check if match is open
@@ -11,23 +13,40 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/matches/$(matchId)).data.status == 'open';
     }
 
+    function isAiUser(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId)) &&
+             get(/databases/$(database)/documents/users/$(userId)).data.name == 'AI';
+    }
+
+    function isValidUserCreate() {
+      return request.resource.data.keys().hasOnly([
+        'name',
+        'photo',
+        'points',
+        'seasonPoints',
+        'correctPredictions',
+        'seasonCorrectPredictions',
+        'wrongPredictions',
+        'seasonWrongPredictions',
+        'streak',
+        'seasonStreak',
+        'accuracy',
+        'seasonAccuracy',
+        'role'
+      ]) &&
+      request.resource.data.role == 'user';
+    }
+
     // Users collection rules
     match /users/{userId} {
       // Read: authenticated users can read any user profile
       allow read: if request.auth != null;
       
-      // Write: users can update their own profile, admins can update any
-      allow write: if request.auth != null && (
-        // User can update their own profile but only safe fields
-        (request.auth.uid == userId && 
-         request.resource.data.keys().hasAll(['name', 'photo']) &&
-         request.resource.data.keys().size() == 2) ||
-        // Admins can update any user profile
-        isAdmin()
-      );
-      
-      // Create: only admins can create users (or system during user creation)
-      allow create: if request.auth != null && isAdmin();
+      // Create/Update: users can write their own profile
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+
+      // Delete: any authenticated user (needed for name-based migration)
+      allow delete: if request.auth != null;
     }
 
     // Matches collection rules
@@ -35,11 +54,17 @@ service cloud.firestore {
       // Read: authenticated users can read matches
       allow read: if request.auth != null;
       
-      // Create/Delete: only admins
-      allow create, delete: if request.auth != null && isAdmin();
+      // Create/Delete/Update: any authenticated user
+      allow create, delete, update: if request.auth != null;
+    }
 
-      // Update: any authenticated user (for closing matches)
-      allow update: if request.auth != null;
+    // Seasons collection rules
+    match /seasons/{seasonId} {
+      // Read: any authenticated user (serve ranking e impostazioni)
+      allow read: if request.auth != null;
+
+      // Create/Update/Delete: solo admin
+      allow create, update, delete: if isAdmin();
     }
 
     // Votes collection rules (subcollection under matches)
@@ -49,8 +74,10 @@ service cloud.firestore {
       
       // Write: users can only write their own vote and only if match is open
       allow write, create: if request.auth != null && 
-                          request.auth.uid == userId && 
-                          isMatchOpen(matchId);
+                          isMatchOpen(matchId) && (
+                            request.auth.uid == userId ||
+                            isAiUser(userId)
+                          );
       
       // Delete: users can delete their own vote, admins can delete any
       allow delete: if request.auth != null && (

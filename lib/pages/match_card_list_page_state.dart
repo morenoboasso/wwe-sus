@@ -173,6 +173,18 @@ class MatchCardListPageState extends State<MatchCardListPage> {
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 6),
+                              ] else if (_isLoading) ...[
+                                AppShimmer(
+                                  child: Container(
+                                    width: 180,
+                                    height: 18,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
                               ],
                               TabBar(
                                 indicatorColor: Colors.white,
@@ -242,11 +254,14 @@ class MatchCardListPageState extends State<MatchCardListPage> {
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Container(
-            height: 140,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(15),
+          child: AppShimmer(
+            child: Container(
+              height: 140,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              ),
             ),
           ),
         );
