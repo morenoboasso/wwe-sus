@@ -8,15 +8,13 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/season_model.dart';
 import '../models/user_model.dart';
-import '../pages/admin_season_settings_page.dart';
 import '../repositories/season_repository.dart';
 import '../repositories/user_repository.dart';
-import '../routes/routes.dart';
 import '../services/imgbb_service.dart';
-import '../services/firebase/firebase_auth_service.dart';
 import '../style/color_style.dart';
 import '../style/text_style.dart';
 import '../widgets/common/app_shimmer.dart';
+import 'settings_page.dart';
 
 Future<File?> cropImageToCircle(BuildContext context, File sourceFile) async {
   final result = await showMaterialImageCropper(
@@ -77,51 +75,14 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         Align(
                           alignment: Alignment.topRight,
-                          child: PopupMenuButton<_ProfileAction>(
-                            icon: const Icon(Icons.more_vert, color: Colors.white),
-                            color: Colors.black87,
-                            elevation: 8,
-                            onSelected: (action) async {
-                              if (action == _ProfileAction.settings) {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const AdminSeasonSettingsPage()),
-                                );
-                              } else if (action == _ProfileAction.logout) {
-                                await FirebaseAuthService().signOut();
-                                if (context.mounted) {
-                                  Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
-                                }
-                              }
-                            },
-                            itemBuilder: (ctx) {
-                              final items = <PopupMenuEntry<_ProfileAction>>[];
-                              if (user.role == AppUserRole.admin) {
-                                items.add(
-                                  const PopupMenuItem(
-                                    value: _ProfileAction.settings,
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.settings, color: Colors.white),
-                                        SizedBox(width: 8),
-                                        Text('Impostazioni stagione', style: TextStyle(color: Colors.white)),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }
-                              items.add(
-                                const PopupMenuItem(
-                                  value: _ProfileAction.logout,
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.logout, color: Colors.white),
-                                      SizedBox(width: 8),
-                                      Text('Logout', style: TextStyle(color: Colors.white)),
-                                    ],
-                                  ),
+                          child: IconButton(
+                            icon: const Icon(Icons.settings, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => SettingsPage(user: user),
                                 ),
                               );
-                              return items;
                             },
                           ),
                         ),
@@ -387,10 +348,6 @@ class _SeasonBadgeShimmer extends StatelessWidget {
   }
 }
 
-enum _ProfileAction {
-  settings,
-  logout,
-}
 
 class _Header extends StatelessWidget {
   const _Header({required this.user});

@@ -222,6 +222,22 @@ class _CurrentSeasonTab extends StatelessWidget {
     return '$days giorni alla fine';
   }
 
+  String _countdownToStart(DateTime startAt, String seasonName) {
+    final diff = startAt.toLocal().difference(DateTime.now());
+    if (diff.isNegative) return '';
+    final totalMinutes = diff.inMinutes;
+    if (totalMinutes < 60) {
+      final m = totalMinutes <= 0 ? 0 : totalMinutes;
+      return '$seasonName tra $m min';
+    }
+    final totalHours = diff.inHours;
+    if (totalHours < 24) {
+      return '$seasonName tra $totalHours ore';
+    }
+    final days = (diff.inSeconds / 86400).ceil();
+    return '$seasonName tra $days giorni';
+  }
+
   @override
   Widget build(BuildContext context) {
     final seasonRepository = SeasonRepository();
@@ -243,6 +259,7 @@ class _CurrentSeasonTab extends StatelessWidget {
 
         final now = DateTime.now();
         final notStarted = now.isBefore(season.startAt);
+        final countdownLabel = notStarted ? _countdownToStart(season.startAt, season.name.isNotEmpty ? season.name : 'La stagione') : '';
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,23 +286,16 @@ class _CurrentSeasonTab extends StatelessWidget {
                     'Fine:   ${_remainingDaysLabel(season.endAt)}',
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
-                  if (notStarted)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 6),
-                      child: Text(
-                        'La stagione non è ancora iniziata.',
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
-                      ),
-                    ),
                 ],
               ),
             ),
             if (notStarted)
-              const Expanded(
+              Expanded(
                 child: Center(
                   child: Text(
-                    'Inizia quando parte la stagione.',
-                    style: TextStyle(color: Colors.white70),
+                    countdownLabel.isNotEmpty ? countdownLabel : 'La stagione non è ancora iniziata.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
               )

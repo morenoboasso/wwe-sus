@@ -37,6 +37,10 @@ class SeasonService {
     return closedSeason;
   }
 
+  Future<List<Season>> fetchSeasons() {
+    return _seasonRepository.fetchSeasons();
+  }
+
   Future<void> _resetUsersSeasonStats(List<AppUser> users) async {
     for (final user in users) {
       final reset = user.copyWith(
@@ -55,5 +59,9 @@ class SeasonService {
     for (final match in matches) {
       await _voteRepository.deleteVotesForMatch(match.id);
     }
+  }
+
+  Future<void> deleteSeason(String seasonId) {
+    return _seasonRepository.deleteSeason(seasonId);
   }
 }

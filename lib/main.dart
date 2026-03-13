@@ -43,24 +43,28 @@ void main() async {
   await authService.ensureSignedIn();
   await GetStorage.init();
 
-  final player = AudioPlayer();
-  await player.setAudioContext(
-    AudioContext(
-      android: const AudioContextAndroid(
-        audioFocus: AndroidAudioFocus.none,
-        usageType: AndroidUsageType.media,
-        contentType: AndroidContentType.music,
-      ),
-      iOS: AudioContextIOS(
-        category: AVAudioSessionCategory.playback,
-        options: const {AVAudioSessionOptions.mixWithOthers},
-      ),
-    ),
-  );
-  await player.setVolume(0.35);
-  await player.play(AssetSource('sound.mp3'));
-
   final box = GetStorage();
+  final startupSoundEnabled = box.read('startupSoundEnabled') as bool? ?? true;
+
+  if (startupSoundEnabled) {
+    final player = AudioPlayer();
+    await player.setAudioContext(
+      AudioContext(
+        android: const AudioContextAndroid(
+          audioFocus: AndroidAudioFocus.none,
+          usageType: AndroidUsageType.media,
+          contentType: AndroidContentType.music,
+        ),
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+          options: const {AVAudioSessionOptions.mixWithOthers},
+        ),
+      ),
+    );
+    await player.setVolume(0.35);
+    await player.play(AssetSource('sound.mp3'));
+  }
+
   final userName = box.read('userName');
 
   runApp(ProviderScope(child: MyApp(initialRoute: userName != null ? AppRoutes.mainScreen : AppRoutes.login)));

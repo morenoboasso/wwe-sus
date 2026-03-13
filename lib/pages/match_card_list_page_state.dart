@@ -51,8 +51,18 @@ class MatchCardListPageState extends State<MatchCardListPage> {
     try {
       final season = await _seasonRepository.fetchLatestOpenSeason();
       if (!mounted) return;
+      if (season == null) {
+        setState(() {
+          _seasonTitle = null;
+        });
+        return;
+      }
+
+      final now = DateTime.now();
+      final isActive = !season.isClosed && !_dateOnly(now).isBefore(_dateOnly(season.startAt)) && !_dateOnly(now).isAfter(_dateOnly(season.endAt));
+
       setState(() {
-        _seasonTitle = season?.name.isNotEmpty == true ? season!.name : null;
+        _seasonTitle = isActive && season.name.isNotEmpty ? season.name : null;
       });
     } catch (_) {
       // ignore
@@ -402,4 +412,6 @@ class MatchCardListPageState extends State<MatchCardListPage> {
       ),
     );
   }
+
+  DateTime _dateOnly(DateTime value) => DateTime(value.year, value.month, value.day);
 }

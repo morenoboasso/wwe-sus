@@ -52,4 +52,8 @@ class SeasonRepository {
       SetOptions(merge: true),
     );
   }
+
+  Future<void> deleteSeason(String seasonId) {
+    return _collection.doc(seasonId).delete();
+  }
 }
