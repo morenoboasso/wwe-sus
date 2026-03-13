@@ -14,12 +14,14 @@ class MatchCardItem extends StatefulWidget {
     required this.item,
     required this.onVoteSubmitted,
     required this.onDelete,
+    required this.canCloseMatch,
     super.key,
   });
 
   final MatchListItem item;
   final VoidCallback onVoteSubmitted;
   final VoidCallback onDelete;
+  final bool canCloseMatch;
 
   @override
   MatchCardItemState createState() => MatchCardItemState();
@@ -188,7 +190,7 @@ class MatchCardItemState extends State<MatchCardItem> {
                       isOpen: isOpen,
                       hasVoted: widget.item.hasVoted,
                     ),
-                  if (isOpen && userSelection != null)
+                  if (isOpen && userSelection != null && widget.canCloseMatch)
                     _buildAdminCloseSection(predictionType: predictionType),
                   const SizedBox(height: 16),
                   TextButton.icon(
@@ -576,15 +578,18 @@ class MatchCardItemState extends State<MatchCardItem> {
       return;
     }
 
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       await _voteController.submitStandardVote(
         matchId: widget.item.match.id,
         winnerId: winnerId,
       );
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Pronostico salvato!')),
-      );
+      if (!mounted) return;
+      CustomSnackbar(
+        color: Colors.green,
+        context: context,
+        message: 'Pronostico salvato! ',
+        icon: Icons.check_circle,
+      ).show();
       widget.onVoteSubmitted();
     } catch (e) {
       _showError('Errore durante il salvataggio.');
@@ -598,15 +603,18 @@ class MatchCardItemState extends State<MatchCardItem> {
       return;
     }
 
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       await _closeController.closeStandardMatch(
         matchId: widget.item.match.id,
         result: result,
       );
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Match chiuso!')),
-      );
+      if (!mounted) return;
+      CustomSnackbar(
+        color: Colors.green,
+        context: context,
+        message: 'Match chiuso!',
+        icon: Icons.check_circle,
+      ).show();
       widget.onVoteSubmitted();
     } catch (e) {
       _showError('Errore durante la chiusura.');
@@ -798,15 +806,18 @@ class MatchCardItemState extends State<MatchCardItem> {
       return;
     }
 
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       await _voteController.submitFreeTextVote(
         matchId: widget.item.match.id,
         winnerText: text,
       );
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Pronostico salvato!')),
-      );
+      if (!mounted) return;
+      CustomSnackbar(
+        color: Colors.green,
+        context: context,
+        message: 'Pronostico salvato!',
+        icon: Icons.check_circle,
+      ).show();
       widget.onVoteSubmitted();
     } catch (e) {
       _showError('Errore durante il salvataggio.');

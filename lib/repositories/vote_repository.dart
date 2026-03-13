@@ -82,4 +82,17 @@ class VoteRepository {
       await doc.reference.delete();
     }
   }
+
+  Future<void> markVoteScored({
+    required String matchId,
+    required String userId,
+    required int points,
+    required bool isCorrect,
+  }) async {
+    await _votesCollection(matchId).doc(userId).set({
+      'scoredAt': FieldValue.serverTimestamp(),
+      'scoredPoints': points,
+      'scoredCorrect': isCorrect,
+    }, SetOptions(merge: true));
+  }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wwe_bets/pages/user_ranking_page.dart';
 import '../pages/create_match_card_page.dart';
-import '../pages/match_card_list_page.dart';
+import '../pages/match_card_list_page_state.dart';
 import '../pages/profile_screen.dart';
 import '../style/color_style.dart';
 

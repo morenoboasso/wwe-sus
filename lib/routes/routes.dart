@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:wwe_bets/pages/login_page.dart';
 import '../pages/create_match_card_page.dart';
-import '../pages/match_card_list_page.dart'; 
+import '../pages/match_card_list_page_state.dart';
 import '../pages/user_ranking_page.dart';
 import '../pages/profile_screen.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';

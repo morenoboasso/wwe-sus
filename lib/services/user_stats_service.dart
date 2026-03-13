@@ -1,6 +1,8 @@
 import '../models/match_model.dart';
+import '../models/season_model.dart';
 import '../models/user_model.dart';
 import '../models/vote_model.dart';
+import '../repositories/vote_repository.dart';
 import '../repositories/user_repository.dart';
 import '../repositories/season_repository.dart';
 import 'points_service.dart';
@@ -8,14 +10,17 @@ import 'points_service.dart';
 class UserStatsService {
   UserStatsService({
     UserRepository? userRepository,
+    VoteRepository? voteRepository,
     SeasonRepository? seasonRepository,
     PointsService? pointsService,
   })
       : _userRepository = userRepository ?? UserRepository(),
+        _voteRepository = voteRepository ?? VoteRepository(),
         _seasonRepository = seasonRepository ?? SeasonRepository(),
         _pointsService = pointsService ?? PointsService();
 
   final UserRepository _userRepository;
+  final VoteRepository _voteRepository;
   final SeasonRepository _seasonRepository;
   final PointsService _pointsService;
 
@@ -23,14 +28,19 @@ class UserStatsService {
     required Match match,
     required List<Vote> votes,
   }) async {
-    final season = await _seasonRepository.fetchLatestOpenSeason();
+    Season? season;
+    try {
+      season = await _seasonRepository.fetchLatestOpenSeason();
+    } catch (_) {
+      season = null;
+    }
     final now = DateTime.now();
-    final isSeasonActive = season != null &&
-        !season.isClosed &&
-        !now.isBefore(season.startAt) &&
-        !now.isAfter(season.endAt);
+    final isSeasonActive = season != null && _isSeasonActive(season, now);
 
     for (final vote in votes) {
+      if (vote.scoredAt != null) {
+        continue;
+      }
       final points = _pointsService.calculatePoints(match, vote);
       final isCorrect = _isVoteCorrect(match, vote);
       final currentUser = await _userRepository.getUserById(vote.userId);
@@ -45,7 +55,26 @@ class UserStatsService {
         applyToSeason: isSeasonActive,
       );
       await _userRepository.upsertUser(updated);
+
+      await _voteRepository.markVoteScored(
+        matchId: vote.matchId,
+        userId: vote.userId,
+        points: points,
+        isCorrect: isCorrect,
+      );
     }
+  }
+
+  bool _isSeasonActive(Season season, DateTime now) {
+    if (season.isClosed) return false;
+    final nowDate = _dateOnly(now);
+    final startDate = _dateOnly(season.startAt);
+    final endDate = _dateOnly(season.endAt);
+    return !nowDate.isBefore(startDate) && !nowDate.isAfter(endDate);
+  }
+
+  DateTime _dateOnly(DateTime value) {
+    return DateTime(value.year, value.month, value.day);
   }
 
   bool _isVoteCorrect(Match match, Vote vote) {

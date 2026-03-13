@@ -1,18 +1,43 @@
-part of 'match_card_list_page.dart';
+import 'package:flutter/material.dart';
+
+import '../controllers/match_list_controller.dart';
+import '../models/match_list_item.dart';
+import '../models/match_model.dart';
+import '../models/ppv_finalize_result.dart';
+import '../models/user_model.dart';
+import '../repositories/match_repository.dart';
+import '../repositories/season_repository.dart';
+import '../repositories/user_repository.dart';
+import '../style/text_style.dart';
+import '../widgets/common/app_shimmer.dart';
+import '../widgets/common/custom_snackbar.dart';
+import '../widgets/common/ppv_celebration_overlay.dart';
+import '../widgets/match_card_item.dart';
+
+class MatchCardListPage extends StatefulWidget {
+  const MatchCardListPage({super.key});
+
+  @override
+  MatchCardListPageState createState() => MatchCardListPageState();
+}
 
 class MatchCardListPageState extends State<MatchCardListPage> {
   final MatchListController _controller = MatchListController();
   final MatchRepository _matchRepository = MatchRepository();
   final SeasonRepository _seasonRepository = SeasonRepository();
+  final UserRepository _userRepository = UserRepository();
   List<MatchListItem> _items = [];
   bool _isLoading = true;
   bool _hasError = false;
   String? _seasonTitle;
+  bool _isAdmin = false;
+  PpvUserOutcome _ppvOutcome = PpvUserOutcome.none;
 
   @override
   void initState() {
     super.initState();
     _loadInitial();
+    _loadCurrentUser();
   }
 
   Future<void> _loadInitial() async {
@@ -34,13 +59,34 @@ class MatchCardListPageState extends State<MatchCardListPage> {
     }
   }
 
+  Future<void> _loadCurrentUser() async {
+    try {
+      final currentUser = await _userRepository.getCurrentUserOnce();
+      if (!mounted) return;
+      setState(() {
+        _isAdmin = currentUser?.role == AppUserRole.admin;
+      });
+    } catch (_) {
+      // ignore
+    }
+  }
+
   Future<void> _finalizePpv(String ppvName) async {
     try {
-      await _controller.finalizePpv(ppvName);
-      _showSuccessSnackbar('PPV terminato e bonus calcolato');
-      _refreshMatches();
+      final result = await _controller.finalizePpv(ppvName);
+      if (result.executed) {
+        _showSuccessSnackbar('PPV terminato e bonus calcolato');
+        if (mounted && result.outcome != PpvUserOutcome.none) {
+          setState(() {
+            _ppvOutcome = result.outcome;
+          });
+        }
+        _refreshMatches();
+      } else {
+        _showErrorSnackbar('PPV non terminato: già processato o match non pronti');
+      }
     } catch (e) {
-      _showErrorSnackbar('Errore nel terminare il PPV');
+      _showErrorSnackbar('Errore nel terminare il PPV: ${e.toString()}');
     }
   }
 
@@ -229,6 +275,15 @@ class MatchCardListPageState extends State<MatchCardListPage> {
                       ],
                     ),
             ),
+            PpvCelebrationOverlay(
+              outcome: _ppvOutcome,
+              onCompleted: () {
+                if (!mounted) return;
+                setState(() {
+                  _ppvOutcome = PpvUserOutcome.none;
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -284,7 +339,9 @@ class MatchCardListPageState extends State<MatchCardListPage> {
           final ppvNameOriginal = entry.key;
           final ppvName = ppvNameOriginal.toUpperCase();
           final items = entry.value;
-          final canFinalize = items.isNotEmpty && items.every((item) => item.match.status == MatchStatus.closed);
+          final canFinalize = _isAdmin &&
+              items.isNotEmpty &&
+              items.every((item) => item.match.status == MatchStatus.closed);
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -331,6 +388,7 @@ class MatchCardListPageState extends State<MatchCardListPage> {
                     item: item,
                     onVoteSubmitted: _refreshMatches,
                     onDelete: () => _deleteMatchCard(item.match.id),
+                    canCloseMatch: _isAdmin,
                   ),
                 ),
               ),

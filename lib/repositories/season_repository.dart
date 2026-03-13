@@ -21,14 +21,25 @@ class SeasonRepository {
   }
 
   Future<Season?> fetchLatestOpenSeason() async {
-    final snapshot = await _collection
-        .where('isClosed', isEqualTo: false)
-        .orderBy('startAt', descending: true)
-        .limit(1)
-        .get();
-    if (snapshot.docs.isEmpty) return null;
-    final doc = snapshot.docs.first;
-    return Season.fromMap(doc.id, doc.data());
+    try {
+      final snapshot = await _collection
+          .where('isClosed', isEqualTo: false)
+          .orderBy('startAt', descending: true)
+          .limit(1)
+          .get();
+      if (snapshot.docs.isEmpty) return null;
+      final doc = snapshot.docs.first;
+      return Season.fromMap(doc.id, doc.data());
+    } catch (_) {
+      // Fallback senza orderBy (evita errori di indice) e seleziona lato client
+      final snapshot = await _collection.where('isClosed', isEqualTo: false).get();
+      if (snapshot.docs.isEmpty) return null;
+      final docs = snapshot.docs
+          .map((doc) => Season.fromMap(doc.id, doc.data()))
+          .toList()
+        ..sort((a, b) => b.startAt.compareTo(a.startAt));
+      return docs.first;
+    }
   }
 
   Future<void> upsertSeason(Season season) {

@@ -64,14 +64,21 @@ class MatchCloseController {
     required String matchId,
     required Map<String, dynamic> updateData,
   }) async {
-    await _matchRepository.updateMatch(matchId, updateData);
+    final existingMatch = await _matchRepository.fetchMatch(matchId);
+    if (existingMatch == null) return;
 
-    final updatedMatch = await _matchRepository.fetchMatch(matchId);
-    if (updatedMatch == null) return;
+    final matchForScoring = existingMatch.copyWith(
+      status: MatchStatus.closed,
+      result: updateData['result'] as String?,
+      resultText: updateData['resultText'] as String?,
+      resultTexts: (updateData['resultTexts'] as List?)?.whereType<String>().toList(),
+    );
 
     final votes = await _voteRepository.fetchMatchVotes(matchId);
-    if (votes.isEmpty) return;
+    if (votes.isNotEmpty) {
+      await _userStatsService.applyMatchResults(match: matchForScoring, votes: votes);
+    }
 
-    await _userStatsService.applyMatchResults(match: updatedMatch, votes: votes);
+    await _matchRepository.updateMatch(matchId, updateData);
   }
 }

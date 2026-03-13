@@ -41,9 +41,12 @@ service cloud.firestore {
     match /users/{userId} {
       // Read: authenticated users can read any user profile
       allow read: if request.auth != null;
-      
-      // Create/Update: users can write their own profile
-      allow create, update: if request.auth != null && request.auth.uid == userId;
+
+      // Create: users can create their own profile
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Update: owners or admins (admin needed to assign points on match close)
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
 
       // Delete: any authenticated user (needed for name-based migration)
       allow delete: if request.auth != null;
@@ -67,17 +70,30 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // PPV bonus marker docs (idempotenza finalizePpv)
+    match /ppv_bonus/{ppvId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
     // Votes collection rules (subcollection under matches)
     match /votes/{matchId}/userVotes/{userId} {
       // Read: authenticated users can read votes (for statistics)
       allow read: if request.auth != null;
       
       // Write: users can only write their own vote and only if match is open
-      allow write, create: if request.auth != null && 
-                          isMatchOpen(matchId) && (
-                            request.auth.uid == userId ||
-                            isAiUser(userId)
-                          );
+      allow create: if request.auth != null &&
+                   isMatchOpen(matchId) && (
+                     request.auth.uid == userId ||
+                     isAiUser(userId)
+                   );
+
+      allow update: if request.auth != null && (
+                     (isMatchOpen(matchId) && (request.auth.uid == userId || isAiUser(userId))) ||
+                     isAdmin()
+                   );
+
+      allow write: if false;
       
       // Delete: users can delete their own vote, admins can delete any
       allow delete: if request.auth != null && (

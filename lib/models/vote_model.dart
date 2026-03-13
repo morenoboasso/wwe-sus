@@ -10,6 +10,9 @@ class Vote {
     this.winnerId,
     this.winnerText,
     required this.timestamp,
+    this.scoredAt,
+    this.scoredPoints,
+    this.scoredCorrect,
   });
 
   final String matchId;
@@ -18,6 +21,9 @@ class Vote {
   final String? winnerId;
   final String? winnerText;
   final DateTime? timestamp;
+  final DateTime? scoredAt;
+  final int? scoredPoints;
+  final bool? scoredCorrect;
 
   bool get isEmpty => (winnerId == null || winnerId!.isEmpty) && (winnerText == null || winnerText!.isEmpty);
 
@@ -37,6 +43,9 @@ class Vote {
       winnerId: data['winnerId'] as String?,
       winnerText: data['winnerText'] as String?,
       timestamp: _toDateTime(data['timestamp']),
+      scoredAt: _toDateTime(data['scoredAt']),
+      scoredPoints: (data['scoredPoints'] as num?)?.toInt(),
+      scoredCorrect: data['scoredCorrect'] as bool?,
     );
   }
 
@@ -46,6 +55,9 @@ class Vote {
       'winnerId': winnerId,
       'winnerText': winnerText,
       'timestamp': timestamp,
+      'scoredAt': scoredAt,
+      'scoredPoints': scoredPoints,
+      'scoredCorrect': scoredCorrect,
     };
   }
 
@@ -65,6 +77,9 @@ class Vote {
     String? winnerId,
     String? winnerText,
     DateTime? timestamp,
+    DateTime? scoredAt,
+    int? scoredPoints,
+    bool? scoredCorrect,
   }) {
     return Vote(
       matchId: matchId,
@@ -73,6 +88,9 @@ class Vote {
       winnerId: winnerId ?? this.winnerId,
       winnerText: winnerText ?? this.winnerText,
       timestamp: timestamp ?? this.timestamp,
+      scoredAt: scoredAt ?? this.scoredAt,
+      scoredPoints: scoredPoints ?? this.scoredPoints,
+      scoredCorrect: scoredCorrect ?? this.scoredCorrect,
     );
   }
 
